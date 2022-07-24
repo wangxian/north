@@ -1,7 +1,5 @@
 package top.xiqiu.servlets;
 
-import top.xiqiu.North;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -19,7 +17,7 @@ public class IndexServlet extends HttpServlet {
 
         // 测试，渲染 jsp 视图
         req.setAttribute("name", "north webapp servlet framework");
-        req.getRequestDispatcher("/templates/test.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/templates/test.jsp").forward(req, resp);
     }
 
     @Override

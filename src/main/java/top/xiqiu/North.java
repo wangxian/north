@@ -34,12 +34,11 @@ public class North {
      * @param mainAppClass
      */
     public static void start(Class<?> mainAppClass) {
-        // 基本目录
+        // 基本目录，fatjar 路径是 xxx/target/xxx.jar
         APP_CLASS_PATH = mainAppClass.getProtectionDomain().getCodeSource().getLocation().getPath();
 
         // 在 fatjar 下运行
         if (APP_CLASS_PATH.endsWith(".jar")) {
-            // APP_CLASS_PATH = APP_CLASS_PATH.substring(0, APP_CLASS_PATH.lastIndexOf("/"));
             isAppRunInJar  = true;
         }
 
@@ -60,6 +59,7 @@ public class North {
 
         // Set port, default 8080
         tomcat.setPort(config().getIntOrDefault("north.server.port", 8080));
+        tomcat.getConnector();
 
         // Set doc base
         tomcat.getHost().setAppBase(DOC_BASE);
@@ -89,11 +89,17 @@ public class North {
             // classes
             resources.addJarResources(new JarResourceSet(resources, "/WEB-INF/classes", APP_CLASS_PATH, "/"));
 
+            // templates
+            resources.addJarResources(new JarResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates"));
+
             // 处理静态文件 /static
             resources.addJarResources(new JarResourceSet(resources, "/static", APP_CLASS_PATH, "/static"));
         } else {
             // classes
             resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", APP_CLASS_PATH, "/"));
+
+            // templates
+            resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates/"));
 
             // 处理静态文件 /static
             resources.addPreResources(new DirResourceSet(resources, "/static", APP_CLASS_PATH, "/static/"));
@@ -123,7 +129,6 @@ public class North {
         context.addServletContainerInitializer(new JasperInitializer(), null);
 
         // Start Tomcat embedded server
-        tomcat.getConnector();
         try {
             tomcat.start();
         } catch (LifecycleException e) {
