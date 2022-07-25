@@ -54,11 +54,11 @@ public class North {
         Tomcat tomcat = new Tomcat();
 
         // 设置基础目录，为了安全，指定临时目录
-        tomcat.setBaseDir(System.getProperty("java.io.tmpdir") + "north.tomcat");
-        System.out.println("java.io.tmpdir=" + System.getProperty("java.io.tmpdir") + "north.tomcat");
+        tomcat.setBaseDir(System.getProperty("java.io.tmpdir") + "north.tomcat." + System.currentTimeMillis());
+        System.out.println("server.tmpdir=" + System.getProperty("java.io.tmpdir") + "north.tomcat." + System.currentTimeMillis());
 
         // Set port, default 8080
-        tomcat.setPort(config().getIntOrDefault("north.server.port", 8080));
+        tomcat.setPort(config().getIntOrDefault("server.port", 8080));
         tomcat.getConnector();
 
         // Set doc base
