@@ -1,4 +1,4 @@
-package top.xiqiu;
+package top.xiqiu.core;
 
 public class AppConfig {
     private static AppConfig _appConfig;
