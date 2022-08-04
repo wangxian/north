@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.core.AppConfig;
 
+import java.io.File;
+
 public class North {
 
     /**
@@ -73,13 +75,22 @@ public class North {
         // 屏蔽 tomcat 启动日志
         java.util.logging.Logger.getLogger("org.apache").setLevel(java.util.logging.Level.WARNING);
 
+        int port = config().getIntOrDefault("server.port", 8080);
+
         // 设置基础目录，为了安全，指定临时目录
-        String tmpdir = System.getProperty("java.io.tmpdir") + "north.tomcat." + System.currentTimeMillis();
+        String tmpdir = System.getProperty("java.io.tmpdir") + "north-tomcat." + port;
+
+        // 清理临时目录
+        File tempFile = new File(tmpdir);
+        tempFile.delete();
+        tempFile.mkdir();
+        tempFile.deleteOnExit();
+
         tomcat.setBaseDir(tmpdir);
         LOGGER.debug("server.tmpdir={}", tmpdir);
 
         // Set port, default 8080
-        tomcat.setPort(config().getIntOrDefault("server.port", 8080));
+        tomcat.setPort(port);
         tomcat.getConnector();
 
         // Set doc base
