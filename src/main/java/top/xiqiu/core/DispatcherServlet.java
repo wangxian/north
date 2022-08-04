@@ -46,7 +46,7 @@ public class DispatcherServlet extends HttpServlet {
         //     req.getRequestDispatcher("/WEB-INF/templates/test.jsp").forward(req, resp);
         // }
 
-        resp.getWriter().write("a-b-c-d-e");
+        resp.getWriter().write("a-b-c-d-e." + System.currentTimeMillis());
         resp.getWriter().flush();
     }
 

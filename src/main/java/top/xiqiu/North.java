@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
 import top.xiqiu.core.AppConfig;
 import top.xiqiu.core.DispatcherServlet;
 
-import java.io.File;
-
 public class North {
 
     /**
@@ -81,14 +79,7 @@ public class North {
         int port = config().getIntOrDefault("server.port", 8080);
 
         // 设置基础目录，为了安全，指定临时目录
-        String tmpdir = System.getProperty("java.io.tmpdir") + "north-tomcat." + port;
-
-        // 清理临时目录
-        File tempFile = new File(tmpdir);
-        tempFile.delete();
-        tempFile.mkdir();
-        tempFile.deleteOnExit();
-
+        String tmpdir = System.getProperty("java.io.tmpdir") + "north-tomcat-" + port + "-" + System.currentTimeMillis();
         tomcat.setBaseDir(tmpdir);
         LOGGER.debug("server.tmpdir={}", tmpdir);
 
