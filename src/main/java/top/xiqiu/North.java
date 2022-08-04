@@ -4,23 +4,22 @@ import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.Wrapper;
-import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.JarResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.jasper.servlet.JasperInitializer;
-import org.apache.tomcat.util.scan.StandardJarScanFilter;
-import org.apache.tomcat.util.scan.StandardJarScanner;
+import org.apache.tomcat.util.descriptor.web.ErrorPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.core.AppConfig;
 
-import java.util.Objects;
-
 public class North {
 
-    public static final Logger logger = LoggerFactory.getLogger(North.class);
+    /**
+     * logger
+     **/
+    private static final Logger LOGGER = LoggerFactory.getLogger(North.class);
 
     /**
      * tomcat server + context
@@ -40,14 +39,9 @@ public class North {
     private static String APP_CLASS_PATH;
 
     /**
-     * WebApp 是否在 fatjar 下运行
+     * WebTester 是否在 fatjar 下运行
      */
     private static boolean isAppRunInJar = false;
-
-    /**
-     * web.xml 位置
-     */
-    private static String webXmlPath;
 
     /**
      * 启动 Webapp
@@ -63,10 +57,7 @@ public class North {
             isAppRunInJar = true;
         }
 
-        // web.xml 的位置
-        webXmlPath = Objects.requireNonNull(mainAppClass.getClassLoader().getResource("WEB-INF/web.xml")).toString();
-        logger.info("web.xml absolute path={}", webXmlPath);
-
+        // Start tomcat server
         _prepareServer();
         _supportJsp();
         _startServer();
@@ -85,25 +76,22 @@ public class North {
         // 设置基础目录，为了安全，指定临时目录
         String tmpdir = System.getProperty("java.io.tmpdir") + "north.tomcat." + System.currentTimeMillis();
         tomcat.setBaseDir(tmpdir);
-        logger.debug("server.tmpdir={}", tmpdir);
+        LOGGER.debug("server.tmpdir={}", tmpdir);
 
         // Set port, default 8080
         tomcat.setPort(config().getIntOrDefault("server.port", 8080));
         tomcat.getConnector();
 
         // Set doc base
+        tomcat.setHostname("0.0.0.0");
         tomcat.getHost().setAppBase(DOC_BASE);
-
-        // Disable auto add web.xml
-        tomcat.setAddDefaultWebXmlToWebapp(false);
 
         // 创建 webapp
         context = tomcat.addWebapp(DEFAULT_CONTEXT_PATH, DOC_BASE);
 
-        // Disable auto add web.xml 后必须添加 addLifecycleListener
-        // 否则静态资源 + jsp解析有问题
-        ((StandardContext) context).setDefaultWebXml(webXmlPath);
-        context.addLifecycleListener(new Tomcat.DefaultWebXmlListener());
+        // Dispatch all web servlet
+        // tomcat.addServlet(DEFAULT_CONTEXT_PATH, "north-dispatcher", new DispatcherServlet());
+        // context.addServletMappingDecoded("/*", "north-dispatcher");
 
         // 热加载，类编译后，自动reload，刷新浏览器即可查看效果，
         // 在非 fatjar 下默认启用
@@ -130,23 +118,33 @@ public class North {
             resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", APP_CLASS_PATH, "/"));
 
             // templates
-            resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates/"));
+            resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates"));
 
             // 处理静态文件 /static
-            resources.addPreResources(new DirResourceSet(resources, "/static", APP_CLASS_PATH, "/static/"));
+            resources.addPreResources(new DirResourceSet(resources, "/static", APP_CLASS_PATH, "/static"));
         }
         context.setResources(resources);
 
-        // Set scanBootstrapClassPath="true" depending on
-        // exactly how your far JAR is packaged / structured
-        StandardJarScanner standardJarScanner = new StandardJarScanner();
-        standardJarScanner.setScanBootstrapClassPath(true);
-        context.setJarScanner(standardJarScanner);
+        // // Set scanBootstrapClassPath="true" depending on
+        // // exactly how your far JAR is packaged / structured
+        // StandardJarScanner standardJarScanner = new StandardJarScanner();
+        // standardJarScanner.setScanBootstrapClassPath(true);
+        // context.setJarScanner(standardJarScanner);
 
-        // 解决/屏蔽 tomcat 启动时 TLDs warning
-        StandardJarScanFilter filter = new StandardJarScanFilter();
-        filter.setTldSkip("*.jar");
-        context.getJarScanner().setJarScanFilter(filter);
+        // // 解决/屏蔽 tomcat 启动时 TLDs warning
+        // StandardJarScanFilter filter = new StandardJarScanFilter();
+        // filter.setTldSkip("*.jar");
+        // context.getJarScanner().setJarScanFilter(filter);
+
+        // ErrorPage
+        ErrorPage page404 = new ErrorPage();
+        page404.setErrorCode(404);
+        page404.setLocation("/404");
+        context.addErrorPage(page404);
+
+        LOGGER.info("static.dir={}", APP_CLASS_PATH + "static/");
+        Context context2 = tomcat.addWebapp("/static", APP_CLASS_PATH + "static/");
+        // context2.addErrorPage(page404);
     }
 
     /**
@@ -176,17 +174,17 @@ public class North {
             tomcat.start();
 
             // Leave startup message
-            logger.info("Startup success at http://{}:{}/", "127.0.0.1", config().getIntOrDefault("port", 8080));
+            LOGGER.info("Startup success at http://{}:{}/", "127.0.0.1", config().getIntOrDefault("port", 8080));
 
             tomcat.getServer().await();
         } catch (LifecycleException e) {
-            logger.error("启动 Tomcat server 失败={}", e.getLocalizedMessage());
+            LOGGER.error("启动 Tomcat server 失败={}", e.getLocalizedMessage());
             e.printStackTrace();
         }
     }
 
     /**
-     * WebApp ClassPath
+     * WebTester ClassPath
      * <p>
      * 说明：
      * - 路径为 .../target/classes/ 或 .../target/xxx.jar
@@ -197,13 +195,14 @@ public class North {
     }
 
     /**
-     * WebApp 运行目录(注意：路径以 / 结尾)
+     * WebTester 运行目录(注意：路径以 / 结尾)
      * 说明：返回应用程序运行的目录
      */
     public static String getBasePath() {
         if (isAppRunInJar) {
             return APP_CLASS_PATH.substring(0, APP_CLASS_PATH.lastIndexOf("/"));
         }
+
         return APP_CLASS_PATH;
     }
 
