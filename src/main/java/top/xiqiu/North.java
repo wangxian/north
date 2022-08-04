@@ -10,9 +10,12 @@ import org.apache.catalina.webresources.JarResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.jasper.servlet.JasperInitializer;
 import org.apache.tomcat.util.descriptor.web.ErrorPage;
+import org.apache.tomcat.util.scan.StandardJarScanFilter;
+import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.core.AppConfig;
+import top.xiqiu.core.DispatcherServlet;
 
 import java.io.File;
 
@@ -98,11 +101,8 @@ public class North {
         tomcat.getHost().setAppBase(DOC_BASE);
 
         // 创建 webapp
-        context = tomcat.addWebapp(DEFAULT_CONTEXT_PATH, DOC_BASE);
-
-        // Dispatch all web servlet
-        // tomcat.addServlet(DEFAULT_CONTEXT_PATH, "north-dispatcher", new DispatcherServlet());
-        // context.addServletMappingDecoded("/*", "north-dispatcher");
+        // context = tomcat.addWebapp(DEFAULT_CONTEXT_PATH, DOC_BASE);
+        context = tomcat.addContext(DEFAULT_CONTEXT_PATH, DOC_BASE);
 
         // 热加载，类编译后，自动reload，刷新浏览器即可查看效果，
         // 在非 fatjar 下默认启用
@@ -138,14 +138,19 @@ public class North {
 
         // // Set scanBootstrapClassPath="true" depending on
         // // exactly how your far JAR is packaged / structured
-        // StandardJarScanner standardJarScanner = new StandardJarScanner();
-        // standardJarScanner.setScanBootstrapClassPath(true);
-        // context.setJarScanner(standardJarScanner);
+        StandardJarScanner standardJarScanner = new StandardJarScanner();
+        standardJarScanner.setScanBootstrapClassPath(true);
+        context.setJarScanner(standardJarScanner);
 
-        // // 解决/屏蔽 tomcat 启动时 TLDs warning
-        // StandardJarScanFilter filter = new StandardJarScanFilter();
-        // filter.setTldSkip("*.jar");
-        // context.getJarScanner().setJarScanFilter(filter);
+        // 解决/屏蔽 tomcat 启动时 TLDs warning
+        StandardJarScanFilter filter = new StandardJarScanFilter();
+        filter.setTldSkip("*.jar");
+        context.getJarScanner().setJarScanFilter(filter);
+
+        // Dispatch all web servlet
+        // tomcat.addServlet(DEFAULT_CONTEXT_PATH, "httpHandlerServlet", new DispatcherServlet());
+        Tomcat.addServlet(context, "north-dispatcher", new DispatcherServlet()).setAsyncSupported(true);
+        context.addServletMappingDecoded("/", "north-dispatcher");
 
         // ErrorPage
         ErrorPage page404 = new ErrorPage();
@@ -155,7 +160,7 @@ public class North {
 
         LOGGER.info("static.dir={}", APP_CLASS_PATH + "static/");
         Context context2 = tomcat.addWebapp("/static", APP_CLASS_PATH + "static/");
-        // context2.addErrorPage(page404);
+        context2.addErrorPage(page404);
     }
 
     /**

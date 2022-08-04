@@ -4,13 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet(urlPatterns = "/")
+// @WebServlet(urlPatterns = "/")
 public class DispatcherServlet extends HttpServlet {
     /**
      * logger
@@ -44,7 +43,7 @@ public class DispatcherServlet extends HttpServlet {
             return;
         }
         // else if (req.getRequestURI().startsWith("/WEB-INF/templates/")) {
-        //     req.getRequestDispatcher("/WEB-INF/templates/test.jsp").include(req, resp);
+        //     req.getRequestDispatcher("/WEB-INF/templates/test.jsp").forward(req, resp);
         // }
 
         resp.getWriter().write("a-b-c-d-e");
