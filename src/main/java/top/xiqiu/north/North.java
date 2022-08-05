@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.core.AppConfig;
 import top.xiqiu.north.core.DispatcherServlet;
+import top.xiqiu.north.support.FileServerServlet;
 
 public class North {
 
@@ -141,15 +142,15 @@ public class North {
         tomcat.addServlet(DEFAULT_CONTEXT_PATH, "north-dispatcher", new DispatcherServlet());
         context.addServletMappingDecoded("/", "north-dispatcher");
 
+        // Serve static files
+        tomcat.addServlet(DEFAULT_CONTEXT_PATH, "static-files", new FileServerServlet());
+        context.addServletMappingDecoded("/static/*", "static-files");
+
         // ErrorPage
         ErrorPage page404 = new ErrorPage();
         page404.setErrorCode(404);
         page404.setLocation("/404");
         context.addErrorPage(page404);
-
-        // LOGGER.info("static.dir={}", APP_CLASS_PATH + "static/");
-        // Context context2 = tomcat.addWebapp("/static", APP_CLASS_PATH + "static/");
-        // context2.addErrorPage(page404);
     }
 
     /**
