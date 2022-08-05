@@ -20,7 +20,7 @@ public class PebbleViewEngine implements ViewEngine {
 
     private final PebbleEngine engine;
 
-    public PebbleViewEngine(ServletContext servletContext) throws IOException {
+    public PebbleViewEngine(ServletContext servletContext) {
         ServletLoader servletLoader = new ServletLoader(servletContext);
         servletLoader.setCharset("UTF-8");
         servletLoader.setPrefix("/templates");

@@ -14,7 +14,7 @@ import java.io.IOException;
  */
 public class JspViewEngine implements ViewEngine {
 
-    public JspViewEngine(ServletContext servletContext) throws IOException {
+    public JspViewEngine(ServletContext servletContext) {
     }
 
     @Override
