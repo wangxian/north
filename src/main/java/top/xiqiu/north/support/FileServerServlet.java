@@ -32,7 +32,13 @@ public class FileServerServlet extends HttpServlet {
         // 根据文件名，猜测 content-type
         String mime = Files.probeContentType(path);
         if (mime == null) {
-            mime = "application/octet-stream";
+            if (filepath.endsWith(".css")) {
+                mime = "text/css";
+            } else if (filepath.endsWith(".js")) {
+                mime = "text/javascript";
+            } else {
+                mime = "application/octet-stream";
+            }
         }
 
         resp.setContentType(mime);

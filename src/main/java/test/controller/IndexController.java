@@ -5,7 +5,10 @@ import top.xiqiu.north.annotation.Controller;
 import top.xiqiu.north.annotation.GetMapping;
 import top.xiqiu.north.core.ModelAndView;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 @Controller
 public class IndexController {
@@ -23,5 +26,12 @@ public class IndexController {
         }
 
         return new ModelAndView("hello.html", "name", name);
+    }
+
+    @GetMapping("/404")
+    public void page404(HttpServletResponse response) throws IOException {
+        PrintWriter printWriter = response.getWriter();
+        printWriter.write("404 NOT FOUND");
+        printWriter.flush();
     }
 }

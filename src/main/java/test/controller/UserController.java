@@ -19,8 +19,8 @@ public class UserController {
     private Map<String, User> userDatabase = new HashMap<>() {
         {
             List<User> users = List.of(
-                    new User("bob@example.com", "bob123", "Bob", "This is bob."),
-                    new User("tom@example.com", "tomcat", "Tom", "This is tom."));
+                    new User("wx@xiqiu.top", "wx", "xiqiu.top", "我是 xiqiu."),
+                    new User("tom@example.com", "tom", "Tom", "This is tom."));
 
             users.forEach(user -> {
                 put(user.email, user);
