@@ -145,6 +145,7 @@ public class North {
         // Serve static files
         tomcat.addServlet(DEFAULT_CONTEXT_PATH, "static-files", new FileServerServlet());
         context.addServletMappingDecoded("/static/*", "static-files");
+        context.addServletMappingDecoded("/favicon.ico", "static-files");
 
         // ErrorPage
         ErrorPage page404 = new ErrorPage();

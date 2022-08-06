@@ -28,8 +28,13 @@ public class IndexController {
         return new ModelAndView("hello.html", "name", name);
     }
 
+    /**
+     * 404 global page
+     */
     @GetMapping("/404")
     public void page404(HttpServletResponse response) throws IOException {
+        response.setContentType("text/plain");
+
         PrintWriter printWriter = response.getWriter();
         printWriter.write("404 NOT FOUND");
         printWriter.flush();

@@ -177,12 +177,14 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doGet(req, resp);
+        logger.debug("access GET {}", req.getRequestURI());
         dispatch(req, resp, this.getMappings);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doPost(req, resp);
+        logger.debug("access POST {}", req.getRequestURI());
         dispatch(req, resp, this.postMappings);
     }
 
