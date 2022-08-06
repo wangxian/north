@@ -26,7 +26,7 @@ public class DispatcherServlet extends HttpServlet {
     /**
      * logger
      **/
-    private static final Logger LOGGER = LoggerFactory.getLogger(DispatcherServlet.class);
+    private static Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
 
     /**
      * get routes
@@ -63,7 +63,7 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         // super.init();
-        LOGGER.info("{} init ...", getClass().getSimpleName());
+        logger.info("{} init ...", getClass().getSimpleName());
 
         // 遍历 controllers，预处理 get/post/put/delete 请求
         for (Class<?> controllerClass : controllers) {
@@ -88,7 +88,7 @@ public class DispatcherServlet extends HttpServlet {
                         String[] parameterNames = Arrays.stream(method.getParameterTypes()).map(p -> p.getName()).toArray(String[]::new);
                         String path = method.getAnnotation(GetMapping.class).value();
 
-                        LOGGER.info("FOUND route {} => {}", path, method);
+                        logger.debug("GET route {} => {}", path, method);
                         this.getMappings.put(path, new GetDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
                     } else if (method.getAnnotation(PostMapping.class) != null) {
                         // 检查返回值类型
@@ -113,7 +113,7 @@ public class DispatcherServlet extends HttpServlet {
                         ObjectMapper objectMapper = new ObjectMapper();
                         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-                        LOGGER.info("FOUND route {} => {}", path, method);
+                        logger.debug("POST route {} => {}", path, method.getName());
                         this.postMappings.put(path, new PostDispatcher(controllerInstance, method, method.getParameterTypes(), objectMapper));
                     }
                 }

@@ -1,7 +1,7 @@
 package top.xiqiu.north.support;
 
 import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.loader.ServletLoader;
+import com.mitchellbosecke.pebble.loader.ClasspathLoader;
 import com.mitchellbosecke.pebble.template.PebbleTemplate;
 import top.xiqiu.north.core.ModelAndView;
 import top.xiqiu.north.core.ViewEngine;
@@ -21,15 +21,23 @@ public class PebbleViewEngine implements ViewEngine {
     private final PebbleEngine engine;
 
     public PebbleViewEngine(ServletContext servletContext) {
-        ServletLoader servletLoader = new ServletLoader(servletContext);
-        servletLoader.setCharset("UTF-8");
-        servletLoader.setPrefix("/templates");
-        servletLoader.setSuffix("");
+        // ServletLoader loader = new ServletLoader(servletContext);
+        // loader.setCharset("UTF-8");
+        // loader.setPrefix("/WEB-INF/templates");
+        // loader.setSuffix("");
+
+        // 最好使用 ClasspathLoader，这样不受 WEB-INF 目录的影响，目录更干净一些
+        // ServletLoader 依赖于 servlet， 需要更改模版视图的位置
+        ClasspathLoader loader = new ClasspathLoader();
+        loader.setCharset("UTF-8");
+        loader.setPrefix("templates");
+        loader.setSuffix("");
 
         this.engine = new PebbleEngine.Builder()
                 .autoEscaping(true)
                 .cacheActive(false)
-                .loader(servletLoader).build();
+                .loader(loader).build();
+
     }
 
     @Override

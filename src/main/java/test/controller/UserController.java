@@ -30,7 +30,7 @@ public class UserController {
 
     @GetMapping("/login")
     public ModelAndView login() {
-        return new ModelAndView("/login.html");
+        return new ModelAndView("login.html");
     }
 
     @PostMapping("/login")
@@ -62,10 +62,10 @@ public class UserController {
     public ModelAndView profile(HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            return new ModelAndView("redirect:/signin");
+            return new ModelAndView("redirect:/login");
         }
 
-        return new ModelAndView("/profile.html", "user", user);
+        return new ModelAndView("profile.html", "user", user);
     }
 }
 

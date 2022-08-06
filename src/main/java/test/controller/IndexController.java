@@ -13,7 +13,7 @@ public class IndexController {
     @GetMapping("/")
     public ModelAndView index(HttpSession session) {
         User user = (User) session.getAttribute("user");
-        return new ModelAndView("/index.html", "user", user);
+        return new ModelAndView("index.html", "user", user);
     }
 
     @GetMapping("/hello")
@@ -22,6 +22,6 @@ public class IndexController {
             name = "World";
         }
 
-        return new ModelAndView("/hello.html", "name", name);
+        return new ModelAndView("hello.html", "name", name);
     }
 }
