@@ -1,8 +1,8 @@
-package test;
+package top.xiqiu.test;
 
-import test.controller.IndexController;
-import test.controller.UserController;
 import top.xiqiu.north.North;
+import top.xiqiu.test.controller.IndexController;
+import top.xiqiu.test.controller.UserController;
 
 import java.util.List;
 

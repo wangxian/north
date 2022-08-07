@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import test.controller.IndexController;
-import test.controller.UserController;
 import top.xiqiu.north.annotation.GetMapping;
 import top.xiqiu.north.annotation.PostMapping;
 import top.xiqiu.north.support.GetDispatcher;
 import top.xiqiu.north.support.PebbleViewEngine;
 import top.xiqiu.north.support.PostDispatcher;
+import top.xiqiu.test.controller.IndexController;
+import top.xiqiu.test.controller.UserController;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

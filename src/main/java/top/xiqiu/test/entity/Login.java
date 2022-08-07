@@ -1,4 +1,4 @@
-package test.entity;
+package top.xiqiu.test.entity;
 
 public class Login {
 

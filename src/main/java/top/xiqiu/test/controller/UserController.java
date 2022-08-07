@@ -1,10 +1,10 @@
-package test.controller;
+package top.xiqiu.test.controller;
 
-import test.entity.Login;
-import test.entity.User;
 import top.xiqiu.north.annotation.GetMapping;
 import top.xiqiu.north.annotation.PostMapping;
 import top.xiqiu.north.core.ModelAndView;
+import top.xiqiu.test.entity.Login;
+import top.xiqiu.test.entity.User;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;

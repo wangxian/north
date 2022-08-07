@@ -91,6 +91,34 @@
         </configuration>
       </plugin>
 
+      <!-- 打包方式二 maven-assembly-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>top.xiqiu.test.WebTester</mainClass>
+            </manifest>
+          </archive>
+
+          <!-- 这是官方默认配置，会打出一个-with-dependencies.jar的包 -->
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 

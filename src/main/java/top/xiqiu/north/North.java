@@ -16,7 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.core.AppConfig;
 import top.xiqiu.north.core.DispatcherServlet;
+import top.xiqiu.north.core.ScanClassWithAnnotations;
 import top.xiqiu.north.support.FileServerServlet;
+
+import java.util.List;
 
 public class North {
 
@@ -61,10 +64,14 @@ public class North {
             isAppRunInJar = true;
         }
 
+        // 扫描需要预处理的类并处理相关注解
+        final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
+        LOGGER.info("扫描到的类 = {}", classes);
+
         // Start tomcat server
-        _prepareServer();
-        _supportJsp();
-        _startServer();
+        // _prepareServer();
+        // _supportJsp();
+        // _startServer();
     }
 
     /**
