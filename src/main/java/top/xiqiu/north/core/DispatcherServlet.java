@@ -9,8 +9,6 @@ import top.xiqiu.north.annotation.PostMapping;
 import top.xiqiu.north.support.GetDispatcher;
 import top.xiqiu.north.support.PebbleViewEngine;
 import top.xiqiu.north.support.PostDispatcher;
-import top.xiqiu.test.controller.IndexController;
-import top.xiqiu.test.controller.UserController;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -19,7 +17,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 // @WebServlet(urlPatterns = "/")
 public class DispatcherServlet extends HttpServlet {
@@ -37,11 +38,6 @@ public class DispatcherServlet extends HttpServlet {
      * post routes
      */
     private Map<String, PostDispatcher> postMappings = new HashMap<>();
-
-    /**
-     * all controllers
-     */
-    private List<Class<?>> controllers = List.of(IndexController.class, UserController.class);
 
     /**
      * template view engine
@@ -66,7 +62,7 @@ public class DispatcherServlet extends HttpServlet {
         logger.info("{} init ...", getClass().getSimpleName());
 
         // 遍历 controllers，预处理 get/post/put/delete 请求
-        for (Class<?> controllerClass : controllers) {
+        for (Class<?> controllerClass : ScanClassWithAnnotations.getStoredControllers()) {
             try {
                 Object controllerInstance = controllerClass.getConstructor().newInstance();
 
@@ -177,14 +173,14 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doGet(req, resp);
-        logger.debug("access GET {}", req.getRequestURI());
+        logger.debug("GET {}", req.getRequestURI());
         dispatch(req, resp, this.getMappings);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doPost(req, resp);
-        logger.debug("access POST {}", req.getRequestURI());
+        logger.debug("POST {}", req.getRequestURI());
         dispatch(req, resp, this.postMappings);
     }
 

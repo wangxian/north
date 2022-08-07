@@ -2,6 +2,7 @@ package top.xiqiu.north.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.xiqiu.north.annotation.Controller;
 import top.xiqiu.north.util.NorthUtil;
 
 import java.io.IOException;
@@ -21,6 +22,18 @@ public class ScanClassWithAnnotations {
      * logger
      **/
     private static final Logger LOGGER = LoggerFactory.getLogger(ScanClassWithAnnotations.class);
+
+    /**
+     * 存储 扫描到的控制器(controllers)
+     */
+    private static List<Class<?>> storedControllers = new ArrayList<>();
+
+    /**
+     * 获取所有的注解的控制器
+     */
+    public static List<Class<?>> getStoredControllers() {
+        return storedControllers;
+    }
 
     /**
      * 查找包下面的类
@@ -146,5 +159,20 @@ public class ScanClassWithAnnotations {
                 classes.add(clazz);
             }
         }
+    }
+
+    /**
+     * 扫描所有的控制器
+     *
+     * @param classes 包下的所有类
+     */
+    public static void scanAndStoreControllers(List<Class<?>> classes) {
+        for (Class<?> clazz : classes) {
+            if (clazz.getAnnotation(Controller.class) != null) {
+                storedControllers.add(clazz);
+            }
+        }
+
+        // LOGGER.info("扫描到的控制器 = {}", storedControllers);
     }
 }

@@ -1,5 +1,6 @@
 package top.xiqiu.test.controller;
 
+import top.xiqiu.north.annotation.Controller;
 import top.xiqiu.north.annotation.GetMapping;
 import top.xiqiu.north.annotation.PostMapping;
 import top.xiqiu.north.core.ModelAndView;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Controller
 public class UserController {
 
     private Map<String, User> userDatabase = new HashMap<>() {

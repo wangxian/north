@@ -48,7 +48,7 @@ public class North {
     /**
      * WebTester 是否在 fatjar 下运行
      */
-    private static boolean isAppRunInJar = false;
+    public static boolean isAppRunInJar = false;
 
     /**
      * 启动 Webapp
@@ -58,20 +58,25 @@ public class North {
     public static void start(Class<?> mainAppClass) {
         // 基本目录，fatjar 路径是 xxx/target/xxx.jar
         APP_CLASS_PATH = mainAppClass.getProtectionDomain().getCodeSource().getLocation().getPath();
+        LOGGER.info("north app classpath = {}", APP_CLASS_PATH);
 
         // 在 fatjar 下运行
         if (APP_CLASS_PATH.endsWith(".jar")) {
             isAppRunInJar = true;
+            System.out.println(mainAppClass.getProtectionDomain().getCodeSource().getLocation().toString());
         }
 
         // 扫描需要预处理的类并处理相关注解
         final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
         LOGGER.info("扫描到的类 = {}", classes);
 
+        // 处理 @Controller 注解
+        ScanClassWithAnnotations.scanAndStoreControllers(classes);
+
         // Start tomcat server
-        // _prepareServer();
-        // _supportJsp();
-        // _startServer();
+        _prepareServer();
+        _supportJsp();
+        _startServer();
     }
 
     /**
