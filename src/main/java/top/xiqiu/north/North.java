@@ -100,6 +100,14 @@ public class North {
         tomcat.setPort(port);
         tomcat.getConnector();
 
+        // 设置 tomcat 运行参数设置
+        // 当所有线程都在使用时，建立连接的请求的等待队列长度，默认100
+        // tomcat.getConnector().setProperty("acceptCount", "1000");
+        // 最大线程数，默认200
+        // tomcat.getConnector().setProperty("maxThreads", "1000");
+        // 允许最大连接数，当达到临界值时，系统可能会基于accept-count继续接受连接，默认10000
+        // tomcat.getConnector().setProperty("maxConnections", "10000");
+
         // Set doc base
         tomcat.setHostname("0.0.0.0");
         tomcat.getHost().setAppBase(DOC_BASE);
