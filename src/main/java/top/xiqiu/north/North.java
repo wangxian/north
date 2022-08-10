@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.core.AppConfig;
 import top.xiqiu.north.core.DispatcherServlet;
+import top.xiqiu.north.core.FileServerServlet;
 import top.xiqiu.north.core.ScanClassWithAnnotations;
-import top.xiqiu.north.support.FileServerServlet;
 
 import java.util.List;
 
