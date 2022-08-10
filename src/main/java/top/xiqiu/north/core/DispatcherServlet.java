@@ -1,7 +1,7 @@
 package top.xiqiu.north.core;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.annotation.GetMapping;
@@ -106,11 +106,10 @@ public class DispatcherServlet extends HttpServlet {
                         }
 
                         String path = method.getAnnotation(PostMapping.class).value();
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                        final Gson gson = new GsonBuilder().serializeNulls().create();
 
                         logger.debug("POST route {} => {}", path, method.getName());
-                        this.postMappings.put(path, new PostDispatcher(controllerInstance, method, method.getParameterTypes(), objectMapper));
+                        this.postMappings.put(path, new PostDispatcher(controllerInstance, method, method.getParameterTypes(), gson));
                     }
                 }
             } catch (ReflectiveOperationException e) {

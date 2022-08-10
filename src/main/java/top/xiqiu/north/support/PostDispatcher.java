@@ -1,6 +1,6 @@
 package top.xiqiu.north.support;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import top.xiqiu.north.core.ModelAndView;
 import top.xiqiu.north.core.RouteDispatcher;
 
@@ -18,13 +18,13 @@ public class PostDispatcher implements RouteDispatcher {
     private final Object instance;
     private final Method method;
     private final Class<?>[] parameterClasses;
-    private final ObjectMapper objectMapper;
+    private final Gson postParameter;
 
-    public PostDispatcher(Object instance, Method method, Class<?>[] parameterClasses, ObjectMapper objectMapper) {
+    public PostDispatcher(Object instance, Method method, Class<?>[] parameterClasses, Gson postParameter) {
         this.instance         = instance;
         this.method           = method;
         this.parameterClasses = parameterClasses;
-        this.objectMapper     = objectMapper;
+        this.postParameter    = postParameter;
     }
 
     @Override
@@ -40,7 +40,8 @@ public class PostDispatcher implements RouteDispatcher {
             } else if (parameterClass == HttpSession.class) {
                 arguments[i] = request.getSession();
             } else {
-                arguments[i] = this.objectMapper.readValue(request.getReader(), parameterClass);
+                // 解析 post 参数为 bean，注入实参
+                arguments[i] = this.postParameter.fromJson(request.getReader(), parameterClass);
             }
         }
 
