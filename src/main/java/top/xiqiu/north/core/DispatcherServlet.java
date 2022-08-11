@@ -4,11 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.xiqiu.north.annotation.DeleteMapping;
 import top.xiqiu.north.annotation.GetMapping;
 import top.xiqiu.north.annotation.PostMapping;
-import top.xiqiu.north.support.GetDispatcher;
-import top.xiqiu.north.support.PebbleViewEngine;
-import top.xiqiu.north.support.PostDispatcher;
+import top.xiqiu.north.annotation.PutMapping;
+import top.xiqiu.north.support.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,6 +40,16 @@ public class DispatcherServlet extends HttpServlet {
     private Map<String, PostDispatcher> postMappings = new HashMap<>();
 
     /**
+     * put routes
+     */
+    private Map<String, PutDispatcher> putMappings = new HashMap<>();
+
+    /**
+     * delete routes
+     */
+    private Map<String, DeleteDispatcher> deleteMappings = new HashMap<>();
+
+    /**
      * template view engine
      */
     private ViewEngine viewEngine;
@@ -48,7 +58,7 @@ public class DispatcherServlet extends HttpServlet {
      * support get parameter types
      */
     private static final Set<Class<?>> SupportedGetParameterTypes =
-            Set.of(int.class, long.class, boolean.class, String.class, HttpServletRequest.class, HttpServletResponse.class, HttpSession.class);
+            Set.of(Integer.class, Long.class, Boolean.class, String.class, HttpServletRequest.class, HttpServletResponse.class, HttpSession.class);
 
     /**
      * support post parameter types
@@ -94,6 +104,7 @@ public class DispatcherServlet extends HttpServlet {
 
                         // 检查形参类型
                         // 注意：不允许多个 entity 类型行参
+                        // noinspection DuplicatedCode
                         Class<?> requestBodyClass = null;
                         for (Class<?> parameterClass : method.getParameterTypes()) {
                             if (!SupportedPostParameterTypes.contains(parameterClass)) {
@@ -110,6 +121,39 @@ public class DispatcherServlet extends HttpServlet {
 
                         logger.debug("POST route {} => {}", path, method.getName());
                         this.postMappings.put(path, new PostDispatcher(controllerInstance, method, method.getParameterTypes(), gson));
+                    } else if (method.getAnnotation(DeleteMapping.class) != null) {
+                        // 检查形参类型
+                        // noinspection DuplicatedCode
+                        for (Class<?> parameterClass : method.getParameterTypes()) {
+                            if (!SupportedGetParameterTypes.contains(parameterClass)) {
+                                throw new UnsupportedOperationException("Unsupported parameter type:" + method.getReturnType() + " for method:" + method);
+                            }
+                        }
+
+                        String[] parameterNames = Arrays.stream(method.getParameterTypes()).map(p -> p.getName()).toArray(String[]::new);
+                        String path = method.getAnnotation(DeleteMapping.class).value();
+
+                        logger.debug("DELETE route {} => {}", path, method);
+                        this.deleteMappings.put(path, new DeleteDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
+                    } else if (method.getAnnotation(PutMapping.class) != null) {
+                        // 检查形参类型，不允许多个 entity 类型行参
+                        // noinspection DuplicatedCode
+                        Class<?> requestBodyClass = null;
+                        for (Class<?> parameterClass : method.getParameterTypes()) {
+                            if (!SupportedPostParameterTypes.contains(parameterClass)) {
+                                if (requestBodyClass == null) {
+                                    requestBodyClass = parameterClass;
+                                } else {
+                                    throw new UnsupportedOperationException("Unsupported duplicate request body type::" + method.getReturnType() + " for method:" + method);
+                                }
+                            }
+                        }
+
+                        String path = method.getAnnotation(PutMapping.class).value();
+                        final Gson gson = new GsonBuilder().serializeNulls().create();
+
+                        logger.debug("PUT route {} => {}", path, method.getName());
+                        this.putMappings.put(path, new PutDispatcher(controllerInstance, method, method.getParameterTypes(), gson));
                     }
                 }
             } catch (ReflectiveOperationException e) {
@@ -185,11 +229,15 @@ public class DispatcherServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doPut(req, resp);
+        // super.doPut(req, resp);
+        logger.debug("PUT {}", req.getRequestURI());
+        dispatch(req, resp, this.putMappings);
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doDelete(req, resp);
+        // super.doDelete(req, resp);
+        logger.debug("DELETE {}", req.getRequestURI());
+        dispatch(req, resp, this.deleteMappings);
     }
 }

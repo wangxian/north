@@ -1,8 +1,11 @@
 package top.xiqiu.test.controller;
 
 import top.xiqiu.north.annotation.Controller;
+import top.xiqiu.north.annotation.DeleteMapping;
 import top.xiqiu.north.annotation.GetMapping;
+import top.xiqiu.north.annotation.PutMapping;
 import top.xiqiu.north.core.ModelAndView;
+import top.xiqiu.test.entity.Login;
 import top.xiqiu.test.entity.User;
 
 import javax.servlet.http.HttpServletResponse;
@@ -38,5 +41,24 @@ public class IndexController {
         PrintWriter printWriter = response.getWriter();
         printWriter.write("404 NOT FOUND");
         printWriter.flush();
+    }
+
+    /**
+     * 测试 - 删除操作
+     */
+    @DeleteMapping("/delete")
+    public void delete(HttpServletResponse resp, Integer id) throws IOException {
+        resp.getWriter().write("delete page id=" + id);
+        resp.getWriter().flush();
+    }
+
+    /**
+     * 测试 - 更新操作
+     * curl -X PUT -d '{"email":"abc@def.com"}' http://127.0.0.1:8080/update/1
+     */
+    @PutMapping("/update/1")
+    public void update(HttpServletResponse resp, Login login) throws IOException {
+        resp.getWriter().write("update email=" + login.email);
+        resp.getWriter().flush();
     }
 }
