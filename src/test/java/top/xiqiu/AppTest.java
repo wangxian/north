@@ -4,19 +4,24 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import top.xiqiu.north.North;
 import top.xiqiu.north.core.JsonConverter;
 import top.xiqiu.test.entity.Login;
 
 import java.lang.reflect.Type;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Unit test for simple App.
  */
 public class AppTest {
+    /**
+     * logger
+     **/
+    private final Logger logger = LoggerFactory.getLogger(AppTest.class);
+
     /**
      * Rigorous Test :-)
      */
@@ -97,5 +102,37 @@ public class AppTest {
         }.getType());
         String email2 = users.get(0).email;
         System.out.println("gson.email=" + email2);
+    }
+
+    @Test
+    public void envAndProperties() {
+        // logger.info("system.env={}", System.getenv());
+        final Map<String, String> envs = System.getenv();
+        for (Map.Entry<String, String> env : envs.entrySet()) {
+            logger.info("{} = {}", env.getKey().toLowerCase(), env.getValue());
+        }
+
+        System.out.println("...".repeat(20));
+
+        final Properties properties = System.getProperties();
+        // 获取方式一
+        // properties.forEach((k, v) -> {
+        //     logger.info("{} = {}", k, v);
+        // });
+
+        // 方式二
+        for (Map.Entry<Object, Object> property : properties.entrySet()) {
+            logger.info("{} = {}", property.getKey(), property.getValue());
+        }
+    }
+
+    @Test
+    public void appConfig() {
+        logger.info("user.dir={}", North.config().get("user.dir", "/tmp"));
+        logger.info("server.host={}", North.config().get("server.host", "192.168.1.22"));
+        logger.info("server.port={}", North.config().getInt("server.port", 8888));
+        logger.info("pwd={}", North.config().get("pwd"));
+
+        Assert.assertEquals(North.config().getInt("server.port", 8888), 8080);
     }
 }

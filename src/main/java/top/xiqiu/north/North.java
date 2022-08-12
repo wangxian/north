@@ -89,7 +89,7 @@ public class North {
         // 屏蔽 tomcat 启动日志
         java.util.logging.Logger.getLogger("org.apache").setLevel(java.util.logging.Level.WARNING);
 
-        int port = config().getIntOrDefault("server.port", 8080);
+        int port = config().getInt("server.port", 8080);
 
         // 设置基础目录，为了安全，指定临时目录
         String tmpdir = System.getProperty("java.io.tmpdir") + "north-tomcat-" + port + "-" + System.currentTimeMillis();
@@ -108,8 +108,8 @@ public class North {
         // 允许最大连接数，当达到临界值时，系统可能会基于accept-count继续接受连接，默认10000
         // tomcat.getConnector().setProperty("maxConnections", "10000");
 
+
         // Set doc base
-        tomcat.setHostname("0.0.0.0");
         tomcat.getHost().setAppBase(DOC_BASE);
 
         // 创建 context,
@@ -201,7 +201,9 @@ public class North {
             tomcat.start();
 
             // Leave startup message
-            LOGGER.info("Startup success at http://{}:{}/", "127.0.0.1", config().getIntOrDefault("port", 8080));
+            LOGGER.info("Startup success at http://{}:{}/",
+                        config().get("server.host", "0.0.0.0"),
+                        config().getInt("server.port", 8080));
 
             tomcat.getServer().await();
         } catch (LifecycleException e) {
@@ -237,6 +239,6 @@ public class North {
      * 读取 AppConfig 配置
      */
     public static AppConfig config() {
-        return AppConfig.getInstance();
+        return AppConfig.init();
     }
 }
