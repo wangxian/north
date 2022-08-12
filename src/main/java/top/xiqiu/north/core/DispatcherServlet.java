@@ -1,7 +1,5 @@
 package top.xiqiu.north.core;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.annotation.DeleteMapping;
@@ -85,6 +83,7 @@ public class DispatcherServlet extends HttpServlet {
                         }
 
                         // 检查形参类型
+                        // noinspection DuplicatedCode
                         for (Class<?> parameterClass : method.getParameterTypes()) {
                             if (!SupportedGetParameterTypes.contains(parameterClass)) {
                                 throw new UnsupportedOperationException("Unsupported parameter type:" + method.getReturnType() + " for method:" + method);
@@ -117,10 +116,9 @@ public class DispatcherServlet extends HttpServlet {
                         }
 
                         String path = method.getAnnotation(PostMapping.class).value();
-                        final Gson gson = new GsonBuilder().serializeNulls().create();
 
                         logger.debug("POST route {} => {}", path, method.getName());
-                        this.postMappings.put(path, new PostDispatcher(controllerInstance, method, method.getParameterTypes(), gson));
+                        this.postMappings.put(path, new PostDispatcher(controllerInstance, method, method.getParameterTypes(), new JsonConverter()));
                     } else if (method.getAnnotation(DeleteMapping.class) != null) {
                         // 检查形参类型
                         // noinspection DuplicatedCode
@@ -150,10 +148,9 @@ public class DispatcherServlet extends HttpServlet {
                         }
 
                         String path = method.getAnnotation(PutMapping.class).value();
-                        final Gson gson = new GsonBuilder().serializeNulls().create();
 
                         logger.debug("PUT route {} => {}", path, method.getName());
-                        this.putMappings.put(path, new PutDispatcher(controllerInstance, method, method.getParameterTypes(), gson));
+                        this.putMappings.put(path, new PutDispatcher(controllerInstance, method, method.getParameterTypes(), new JsonConverter()));
                     }
                 }
             } catch (ReflectiveOperationException e) {
@@ -175,8 +172,6 @@ public class DispatcherServlet extends HttpServlet {
      */
     private void dispatch(HttpServletRequest req, HttpServletResponse resp, Map<String, ? extends RouteDispatcher> dispatcherMap)
             throws IOException, ServletException {
-        resp.setContentType("text/html");
-        resp.setCharacterEncoding("UTF-8");
 
         String path = req.getRequestURI().substring(req.getContextPath().length());
         RouteDispatcher routeDispatcher = dispatcherMap.get(path);
@@ -199,6 +194,10 @@ public class DispatcherServlet extends HttpServlet {
         if (modelAndView == null) {
             return;
         }
+
+        // 设置响应 html 类型内容
+        resp.setContentType("text/html");
+        resp.setCharacterEncoding("UTF-8");
 
         // 支持控制器 redirect:/user/index 跳转到其他 URL
         if (modelAndView.getView().startsWith("redirect:")) {
