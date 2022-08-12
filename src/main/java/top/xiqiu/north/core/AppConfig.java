@@ -30,8 +30,8 @@ public class AppConfig extends Properties {
             }
 
 
-            // 加载系统 env 环境变量，
-            // 环境变量的优先级高于Java系统属性
+            // 加载系统 env 环境变量
+            // 优先级：环境变量 > application.properties > Java系统属性
             System.getenv().forEach((key, value) -> _appConfig.setProperty(key.toLowerCase(), value));
         }
 
