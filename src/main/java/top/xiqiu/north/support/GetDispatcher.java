@@ -44,11 +44,11 @@ public class GetDispatcher implements RouteDispatcher {
                 arguments[i] = response;
             } else if (parameterClass == HttpSession.class) {
                 arguments[i] = request.getSession();
-            } else if (parameterClass == int.class) {
+            } else if (parameterClass == Integer.class) {
                 arguments[i] = Integer.valueOf(getOrDefault(request, parameterName, "0"));
-            } else if (parameterClass == long.class) {
+            } else if (parameterClass == Long.class) {
                 arguments[i] = Long.valueOf(getOrDefault(request, parameterName, "0"));
-            } else if (parameterClass == boolean.class) {
+            } else if (parameterClass == Boolean.class) {
                 arguments[i] = Boolean.valueOf(getOrDefault(request, parameterName, "0"));
             } else if (parameterClass == String.class) {
                 arguments[i] = String.valueOf(getOrDefault(request, parameterName, "0"));

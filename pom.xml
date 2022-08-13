@@ -79,6 +79,7 @@
         <version>3.10.1</version>
         <configuration>
           <skip>true</skip>
+          <parameters>true</parameters>
         </configuration>
       </plugin>
       <plugin>

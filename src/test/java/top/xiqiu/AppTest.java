@@ -12,6 +12,8 @@ import top.xiqiu.north.util.NorthUtil;
 import top.xiqiu.test.entity.Login;
 
 import java.lang.reflect.Type;
+import java.security.Provider;
+import java.security.Security;
 import java.util.*;
 
 /**
@@ -157,6 +159,14 @@ public class AppTest {
     public void hashTest() {
         Assert.assertEquals(NorthUtil.md5("111111"), "96e79218965eb72c92a549dd5a330112");
         Assert.assertEquals(NorthUtil.sha1("111111"), "3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d");
+
+        final Provider[] providers = Security.getProviders();
+        for (Provider provider : providers) {
+            // logger.info("provider={}", provider.getInfo());
+            provider.forEach((key, value) -> {
+                logger.info("{} = {}", key, value);
+            });
+        }
     }
 
 }

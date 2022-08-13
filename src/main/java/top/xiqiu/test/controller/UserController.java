@@ -40,15 +40,15 @@ public class UserController {
         User user = userDatabase.get(bean.email);
         if (user == null || !user.password.equals(bean.password)) {
             response.setContentType("application/json");
-            PrintWriter pw = response.getWriter();
-            pw.write("{\"error\":\"Bad email or password\"}");
-            pw.flush();
+            PrintWriter printWriter = response.getWriter();
+            printWriter.write("{\"error\":\"bad email or password\"}");
+            printWriter.flush();
         } else {
             session.setAttribute("user", user);
             response.setContentType("application/json");
-            PrintWriter pw = response.getWriter();
-            pw.write("{\"result\":true}");
-            pw.flush();
+            PrintWriter printWriter = response.getWriter();
+            printWriter.write("{\"result\": true}");
+            printWriter.flush();
         }
 
         return null;

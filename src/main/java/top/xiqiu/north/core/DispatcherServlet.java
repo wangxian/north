@@ -90,7 +90,7 @@ public class DispatcherServlet extends HttpServlet {
                             }
                         }
 
-                        String[] parameterNames = Arrays.stream(method.getParameterTypes()).map(p -> p.getName()).toArray(String[]::new);
+                        String[] parameterNames = Arrays.stream(method.getParameters()).map(p -> p.getName()).toArray(String[]::new);
                         String path = method.getAnnotation(GetMapping.class).value();
 
                         logger.debug("GET route {} => {}", path, method);
@@ -128,7 +128,7 @@ public class DispatcherServlet extends HttpServlet {
                             }
                         }
 
-                        String[] parameterNames = Arrays.stream(method.getParameterTypes()).map(p -> p.getName()).toArray(String[]::new);
+                        String[] parameterNames = Arrays.stream(method.getParameters()).map(p -> p.getName()).toArray(String[]::new);
                         String path = method.getAnnotation(DeleteMapping.class).value();
 
                         logger.debug("DELETE route {} => {}", path, method);

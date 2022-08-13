@@ -1,0 +1,25 @@
+### 登陆
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "email": "wx@xiqiu.top",
+  "password": "wx"
+}
+
+### 个人资料
+GET http://localhost:8080/user/profile
+
+### 个人首页
+GET http://localhost:8080/
+
+### 删除 id=1
+DELETE http://localhost:8080/delete?id=99
+
+### 更新
+PUT http://localhost:8080/update/1
+Content-Type: application/json
+
+{
+  "email": "new@xiqiu.top"
+}
