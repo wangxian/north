@@ -45,9 +45,10 @@ public class IndexController {
 
     /**
      * 测试 - 删除操作
+     * curl -X DELETE http://127.0.0.1:8080/delete?id=1
      */
     @DeleteMapping("/delete")
-    public void delete(HttpServletResponse resp, Integer id) throws IOException {
+    public void delete(HttpServletResponse resp, Long id) throws IOException {
         resp.getWriter().write("delete page id=" + id);
         resp.getWriter().flush();
     }

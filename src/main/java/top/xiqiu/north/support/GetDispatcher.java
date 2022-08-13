@@ -45,15 +45,23 @@ public class GetDispatcher implements RouteDispatcher {
             } else if (parameterClass == HttpSession.class) {
                 arguments[i] = request.getSession();
             } else if (parameterClass == Integer.class) {
-                arguments[i] = Integer.valueOf(getOrDefault(request, parameterName, "0"));
+                try {
+                    arguments[i] = Integer.valueOf(getOrDefault(request, parameterName, "0"));
+                } catch (NumberFormatException e) {
+                    arguments[i] = 0;
+                }
             } else if (parameterClass == Long.class) {
-                arguments[i] = Long.valueOf(getOrDefault(request, parameterName, "0"));
+                try {
+                    arguments[i] = Long.valueOf(getOrDefault(request, parameterName, "0"));
+                } catch (NumberFormatException e) {
+                    arguments[i] = 0L;
+                }
             } else if (parameterClass == Boolean.class) {
                 arguments[i] = Boolean.valueOf(getOrDefault(request, parameterName, "0"));
             } else if (parameterClass == String.class) {
                 arguments[i] = String.valueOf(getOrDefault(request, parameterName, "0"));
             } else {
-                throw new RuntimeException("miss handler for type: " + parameterClass);
+                throw new RuntimeException("invalid parameter class type: " + parameterClass);
             }
         }
 

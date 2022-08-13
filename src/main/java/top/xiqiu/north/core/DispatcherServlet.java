@@ -76,7 +76,7 @@ public class DispatcherServlet extends HttpServlet {
 
                 // 处理控制器内的注解方法
                 for (Method method : controllerClass.getMethods()) {
-                    if (method.getAnnotation(GetMapping.class) != null) {
+                    if (method.getAnnotation(GetMapping.class) != null || method.getAnnotation(DeleteMapping.class) != null) {
                         // 检查返回值类型
                         if (method.getReturnType() != ModelAndView.class && method.getReturnType() != void.class) {
                             throw new UnsupportedOperationException("Unsupported return type:" + method.getReturnType() + " for method:" + method);
@@ -91,11 +91,19 @@ public class DispatcherServlet extends HttpServlet {
                         }
 
                         String[] parameterNames = Arrays.stream(method.getParameters()).map(p -> p.getName()).toArray(String[]::new);
-                        String path = method.getAnnotation(GetMapping.class).value();
 
-                        logger.debug("GET route {} => {}", path, method);
-                        this.getMappings.put(path, new GetDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
-                    } else if (method.getAnnotation(PostMapping.class) != null) {
+                        if (method.getAnnotation(GetMapping.class) != null) {
+                            String path = method.getAnnotation(GetMapping.class).value();
+
+                            logger.debug("GET {} => {}", path, method);
+                            this.getMappings.put(path, new GetDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
+                        } else {
+                            String path = method.getAnnotation(DeleteMapping.class).value();
+
+                            logger.debug("DELETE {} => {}", path, method);
+                            this.deleteMappings.put(path, new DeleteDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
+                        }
+                    } else if (method.getAnnotation(PostMapping.class) != null || method.getAnnotation(PutMapping.class) != null) {
                         // 检查返回值类型
                         if (method.getReturnType() != ModelAndView.class && method.getReturnType() != void.class) {
                             throw new UnsupportedOperationException("Unsupported return type:" + method.getReturnType() + " for method:" + method);
@@ -115,42 +123,17 @@ public class DispatcherServlet extends HttpServlet {
                             }
                         }
 
-                        String path = method.getAnnotation(PostMapping.class).value();
+                        if (method.getAnnotation(PostMapping.class) != null) {
+                            String path = method.getAnnotation(PostMapping.class).value();
 
-                        logger.debug("POST route {} => {}", path, method.getName());
-                        this.postMappings.put(path, new PostDispatcher(controllerInstance, method, method.getParameterTypes(), new JsonConverter()));
-                    } else if (method.getAnnotation(DeleteMapping.class) != null) {
-                        // 检查形参类型
-                        // noinspection DuplicatedCode
-                        for (Class<?> parameterClass : method.getParameterTypes()) {
-                            if (!SupportedGetParameterTypes.contains(parameterClass)) {
-                                throw new UnsupportedOperationException("Unsupported parameter type:" + method.getReturnType() + " for method:" + method);
-                            }
+                            logger.debug("POST {} => {}", path, method.getName());
+                            this.postMappings.put(path, new PostDispatcher(controllerInstance, method, method.getParameterTypes(), new JsonConverter()));
+                        } else {
+                            String path = method.getAnnotation(PutMapping.class).value();
+
+                            logger.debug("PUT {} => {}", path, method.getName());
+                            this.putMappings.put(path, new PutDispatcher(controllerInstance, method, method.getParameterTypes(), new JsonConverter()));
                         }
-
-                        String[] parameterNames = Arrays.stream(method.getParameters()).map(p -> p.getName()).toArray(String[]::new);
-                        String path = method.getAnnotation(DeleteMapping.class).value();
-
-                        logger.debug("DELETE route {} => {}", path, method);
-                        this.deleteMappings.put(path, new DeleteDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
-                    } else if (method.getAnnotation(PutMapping.class) != null) {
-                        // 检查形参类型，不允许多个 entity 类型行参
-                        // noinspection DuplicatedCode
-                        Class<?> requestBodyClass = null;
-                        for (Class<?> parameterClass : method.getParameterTypes()) {
-                            if (!SupportedPostParameterTypes.contains(parameterClass)) {
-                                if (requestBodyClass == null) {
-                                    requestBodyClass = parameterClass;
-                                } else {
-                                    throw new UnsupportedOperationException("Unsupported duplicate request body type::" + method.getReturnType() + " for method:" + method);
-                                }
-                            }
-                        }
-
-                        String path = method.getAnnotation(PutMapping.class).value();
-
-                        logger.debug("PUT route {} => {}", path, method.getName());
-                        this.putMappings.put(path, new PutDispatcher(controllerInstance, method, method.getParameterTypes(), new JsonConverter()));
                     }
                 }
             } catch (ReflectiveOperationException e) {
