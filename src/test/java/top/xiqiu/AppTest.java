@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.North;
 import top.xiqiu.north.core.JsonConverter;
+import top.xiqiu.north.util.NorthUtil;
 import top.xiqiu.test.entity.Login;
 
 import java.lang.reflect.Type;
@@ -135,4 +136,27 @@ public class AppTest {
 
         Assert.assertEquals(North.config().getInt("server.port", 8888), 8080);
     }
+
+    /**
+     * 测试获取 extName
+     */
+    @Test
+    public void extName() {
+        System.out.println(NorthUtil.extName("/tmp/abc.txt"));
+        System.out.println(NorthUtil.extName("/tmp/abc.png"));
+        System.out.println(NorthUtil.extName(" "));
+        System.out.println(NorthUtil.extName("abc.txt"));
+        System.out.println(NorthUtil.extName("xx.webp"));
+        System.out.println(NorthUtil.extName("xx.html"));
+        System.out.println(NorthUtil.extName("xx.css"));
+        System.out.println(NorthUtil.extName("xx.js"));
+        System.out.println(NorthUtil.extName("xx.log"));
+    }
+
+    @Test
+    public void hashTest() {
+        Assert.assertEquals(NorthUtil.md5("111111"), "96e79218965eb72c92a549dd5a330112");
+        Assert.assertEquals(NorthUtil.sha1("111111"), "3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d");
+    }
+
 }
