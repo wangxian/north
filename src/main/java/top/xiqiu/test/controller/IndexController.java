@@ -55,11 +55,11 @@ public class IndexController {
 
     /**
      * 测试 - 更新操作
-     * curl -X PUT -d '{"email":"abc@def.com"}' http://127.0.0.1:8080/update/1
+     * curl -X PUT -d '{"email":"abc@def.com"}' http://127.0.0.1:8080/update?id=98
      */
-    @PutMapping("/update/1")
-    public void update(HttpServletResponse resp, Login login) throws IOException {
-        resp.getWriter().write("update email=" + login.email);
+    @PutMapping("/update")
+    public void update(HttpServletResponse resp, Integer id, Login login) throws IOException {
+        resp.getWriter().write("update id=" + id + ", email=" + login.email);
         resp.getWriter().flush();
     }
 }

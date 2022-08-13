@@ -48,13 +48,25 @@ public class GetDispatcher implements RouteDispatcher {
                 try {
                     arguments[i] = Integer.valueOf(getOrDefault(request, parameterName, "0"));
                 } catch (NumberFormatException e) {
-                    arguments[i] = 0;
+                    arguments[i] = Integer.valueOf(0);
                 }
             } else if (parameterClass == Long.class) {
                 try {
                     arguments[i] = Long.valueOf(getOrDefault(request, parameterName, "0"));
                 } catch (NumberFormatException e) {
-                    arguments[i] = 0L;
+                    arguments[i] = Long.valueOf(0);
+                }
+            } else if (parameterClass == Float.class) {
+                try {
+                    arguments[i] = Float.valueOf(getOrDefault(request, parameterName, "0"));
+                } catch (NumberFormatException e) {
+                    arguments[i] = Float.valueOf(0);
+                }
+            } else if (parameterClass == Double.class) {
+                try {
+                    arguments[i] = Double.valueOf(getOrDefault(request, parameterName, "0"));
+                } catch (NumberFormatException e) {
+                    arguments[i] = Double.valueOf(0);
                 }
             } else if (parameterClass == Boolean.class) {
                 arguments[i] = Boolean.valueOf(getOrDefault(request, parameterName, "0"));

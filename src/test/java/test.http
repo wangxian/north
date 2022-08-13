@@ -17,7 +17,7 @@ GET http://localhost:8080/
 DELETE http://localhost:8080/delete?id=99
 
 ### 更新
-PUT http://localhost:8080/update/1
+PUT http://localhost:8080/update?id=109
 Content-Type: application/json
 
 {

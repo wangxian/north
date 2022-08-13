@@ -25,7 +25,7 @@ public class DispatcherServlet extends HttpServlet {
     /**
      * logger
      **/
-    private static Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
+    private final Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
 
     /**
      * get routes
@@ -53,16 +53,11 @@ public class DispatcherServlet extends HttpServlet {
     private ViewEngine viewEngine;
 
     /**
-     * support get parameter types
+     * support method parameter types
      */
-    private static final Set<Class<?>> SupportedGetParameterTypes =
-            Set.of(Integer.class, Long.class, Boolean.class, String.class, HttpServletRequest.class, HttpServletResponse.class, HttpSession.class);
-
-    /**
-     * support post parameter types
-     */
-    private static final Set<Class<?>> SupportedPostParameterTypes =
-            Set.of(HttpServletRequest.class, HttpServletResponse.class, HttpSession.class);
+    private static final Set<Class<?>> SUPPORT_PARAMETER_TYPES =
+            Set.of(Integer.class, Long.class, Float.class, Double.class, Boolean.class, String.class,
+                   HttpServletRequest.class, HttpServletResponse.class, HttpSession.class);
 
     @Override
     public void init() throws ServletException {
@@ -85,11 +80,12 @@ public class DispatcherServlet extends HttpServlet {
                         // 检查形参类型
                         // noinspection DuplicatedCode
                         for (Class<?> parameterClass : method.getParameterTypes()) {
-                            if (!SupportedGetParameterTypes.contains(parameterClass)) {
+                            if (!SUPPORT_PARAMETER_TYPES.contains(parameterClass)) {
                                 throw new UnsupportedOperationException("Unsupported parameter type:" + method.getReturnType() + " for method:" + method);
                             }
                         }
 
+                        // 参数名称
                         String[] parameterNames = Arrays.stream(method.getParameters()).map(p -> p.getName()).toArray(String[]::new);
 
                         if (method.getAnnotation(GetMapping.class) != null) {
@@ -109,30 +105,32 @@ public class DispatcherServlet extends HttpServlet {
                             throw new UnsupportedOperationException("Unsupported return type:" + method.getReturnType() + " for method:" + method);
                         }
 
-                        // 检查形参类型
-                        // 注意：不允许多个 entity 类型行参
+                        // 检查形参类型（不允许多个 entity 类型行参，否则不能识别那个是那个啦）
                         // noinspection DuplicatedCode
                         Class<?> requestBodyClass = null;
                         for (Class<?> parameterClass : method.getParameterTypes()) {
-                            if (!SupportedPostParameterTypes.contains(parameterClass)) {
+                            if (!SUPPORT_PARAMETER_TYPES.contains(parameterClass)) {
                                 if (requestBodyClass == null) {
                                     requestBodyClass = parameterClass;
                                 } else {
-                                    throw new UnsupportedOperationException("Unsupported duplicate request body type::" + method.getReturnType() + " for method:" + method);
+                                    throw new UnsupportedOperationException("Unsupported duplicate entity parameter type:" + requestBodyClass.getSimpleName() + " for method:" + method);
                                 }
                             }
                         }
+
+                        // 参数名称
+                        String[] parameterNames = Arrays.stream(method.getParameters()).map(p -> p.getName()).toArray(String[]::new);
 
                         if (method.getAnnotation(PostMapping.class) != null) {
                             String path = method.getAnnotation(PostMapping.class).value();
 
                             logger.debug("POST {} => {}", path, method.getName());
-                            this.postMappings.put(path, new PostDispatcher(controllerInstance, method, method.getParameterTypes(), new JsonConverter()));
+                            this.postMappings.put(path, new PostDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes(), new JsonConverter()));
                         } else {
                             String path = method.getAnnotation(PutMapping.class).value();
 
                             logger.debug("PUT {} => {}", path, method.getName());
-                            this.putMappings.put(path, new PutDispatcher(controllerInstance, method, method.getParameterTypes(), new JsonConverter()));
+                            this.putMappings.put(path, new PutDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes(), new JsonConverter()));
                         }
                     }
                 }

@@ -1,0 +1,248 @@
+PUT http://localhost:8080/update?id=109
+Content-Type: application/json
+
+{
+  "email": "new@xiqiu.top"
+}
+
+<> 2022-08-14T011814.200.txt
+
+###
+
+PUT http://localhost:8080/update?id=1
+Content-Type: application/json
+
+{
+  "email": "new@xiqiu.top"
+}
+
+<> 2022-08-14T011807.200.txt
+
+###
+
+PUT http://localhost:8080/update?id=1
+Content-Type: application/json
+
+{
+  "email": "new@xiqiu.top"
+}
+
+<> 2022-08-14T011745.500.html
+
+###
+
+PUT http://localhost:8080/update/1
+Content-Type: application/json
+
+{
+  "email": "new@xiqiu.top"
+}
+
+<> 2022-08-14T002756.200.txt
+
+###
+
+DELETE http://localhost:8080/delete?id=99
+
+<> 2022-08-14T002746.200.txt
+
+###
+
+DELETE http://localhost:8080/delete?id=99
+
+###
+
+PUT http://localhost:8080/update/1
+Content-Type: application/json
+
+{
+  "email": "new@xiqiu.top"
+}
+
+<> 2022-08-14T002637.200.txt
+
+###
+
+DELETE http://localhost:8080/delete?id=99
+
+###
+
+DELETE http://localhost:8080/delete?id=99
+
+###
+
+PUT http://localhost:8080/update/1
+Content-Type: application/json
+
+{
+  "email": "new@xiqiu.top"
+}
+
+<> 2022-08-14T002601.200.txt
+
+###
+
+PUT http://localhost:8080/update/1
+Content-Type: application/json
+
+{
+  "email": "new@xiqiu.top"
+}
+
+<> 2022-08-14T002557.200.txt
+
+###
+
+PUT http://localhost:8080/update/1
+Content-Type: application/json
+
+{"email": "new@xiqiu.top"}
+
+<> 2022-08-13T234135.200.txt
+
+###
+
+PUT http://localhost:8080/update/1
+Content-Type: application/json
+
+{"email": "new@xiqiu.top"}
+
+<> 2022-08-13T234129.200.txt
+
+###
+
+DELETE http://localhost:8080/delete?id=99
+
+<> 2022-08-13T233528.200.txt
+
+###
+
+DELETE http://localhost:8080/delete?id=99
+
+###
+
+DELETE http://localhost:8080/delete?id=99
+
+<> 2022-08-13T233003.200.txt
+
+###
+
+DELETE http://localhost:8080/delete?id=1
+
+<> 2022-08-13T232943.200.txt
+
+###
+
+DELETE http://localhost:8080/delete?id=1
+
+<> 2022-08-13T231902.200.txt
+
+###
+
+DELETE http://localhost:8080/delete?id=1
+
+<> 2022-08-13T231346.200.txt
+
+###
+
+DELETE http://localhost:8080/delete?id=1
+
+<> 2022-08-13T231035.200.txt
+
+###
+
+DELETE http://localhost:8080/delete?id=1
+
+<> 2022-08-13T230619.500.html
+
+###
+
+GET http://localhost:8080
+
+<> 2022-08-13T224908.200.html
+
+###
+
+GET http://localhost:8080/user/profile
+
+<> 2022-08-13T224740.200.html
+
+###
+
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{"email": "wx@xiqiu.top", "password":  "wx"}
+
+<> 2022-08-13T224424.200.json
+
+###
+
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{}
+
+<> 2022-08-13T224330.200.json
+
+###
+
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{}
+
+<> 2022-08-13T224310.200.json
+
+###
+
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{}
+
+<> 2022-08-13T224301.200.json
+
+###
+
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{}
+
+<> 2022-08-13T224258.200.json
+
+###
+
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{}
+
+<> 2022-08-13T224252.200.json
+
+###
+
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{}
+
+<> 2022-08-13T224158.200.json
+
+###
+
+POST http://localhost:8080/user/login
+Content-Type: application/json
+
+{}
+
+###
+
+POST http://localhost:8080/user/login
+Content-Type: application/json
+
+{}
+
+###
+
