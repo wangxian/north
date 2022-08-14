@@ -2,9 +2,9 @@ package top.xiqiu.north.annotation;
 
 import java.lang.annotation.*;
 
+@Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Documented
 public @interface GetMapping {
     String value();
 }

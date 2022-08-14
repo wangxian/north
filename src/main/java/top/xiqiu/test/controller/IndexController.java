@@ -15,7 +15,7 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.HashMap;
 
-@Controller
+@Controller("/")
 public class IndexController {
 
     @GetMapping("/")

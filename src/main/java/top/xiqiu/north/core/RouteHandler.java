@@ -2,10 +2,7 @@ package top.xiqiu.north.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.xiqiu.north.annotation.DeleteMapping;
-import top.xiqiu.north.annotation.GetMapping;
-import top.xiqiu.north.annotation.PostMapping;
-import top.xiqiu.north.annotation.PutMapping;
+import top.xiqiu.north.annotation.*;
 import top.xiqiu.north.support.DeleteDispatcher;
 import top.xiqiu.north.support.GetDispatcher;
 import top.xiqiu.north.support.PostDispatcher;
@@ -63,6 +60,13 @@ public class RouteHandler {
             try {
                 Object controllerInstance = controllerClass.getConstructor().newInstance();
 
+                // 控制器默认URI
+                String controllerContextPath = controllerClass.getAnnotation(Controller.class).value();
+                // 去除控制器路径结尾的 '/'
+                if (controllerContextPath.endsWith("/")) {
+                    controllerContextPath = controllerContextPath.substring(0, controllerContextPath.length() - 1);
+                }
+
                 // 处理控制器内的注解方法
                 for (Method method : controllerClass.getMethods()) {
                     if (method.getAnnotation(GetMapping.class) != null || method.getAnnotation(DeleteMapping.class) != null) {
@@ -83,14 +87,14 @@ public class RouteHandler {
                         String[] parameterNames = Arrays.stream(method.getParameters()).map(p -> p.getName()).toArray(String[]::new);
 
                         if (method.getAnnotation(GetMapping.class) != null) {
-                            String path = method.getAnnotation(GetMapping.class).value();
+                            String path = controllerContextPath + method.getAnnotation(GetMapping.class).value();
 
-                            logger.debug("GET {} => {}", path, method);
+                            logger.info("[route] GET {} => {}", path, method);
                             getMappings.put(path, new GetDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
                         } else {
-                            String path = method.getAnnotation(DeleteMapping.class).value();
+                            String path = controllerContextPath + method.getAnnotation(DeleteMapping.class).value();
 
-                            logger.debug("DELETE {} => {}", path, method);
+                            logger.info("[route] DELETE {} => {}", path, method);
                             deleteMappings.put(path, new DeleteDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
                         }
                     } else if (method.getAnnotation(PostMapping.class) != null || method.getAnnotation(PutMapping.class) != null) {
@@ -116,14 +120,14 @@ public class RouteHandler {
                         String[] parameterNames = Arrays.stream(method.getParameters()).map(p -> p.getName()).toArray(String[]::new);
 
                         if (method.getAnnotation(PostMapping.class) != null) {
-                            String path = method.getAnnotation(PostMapping.class).value();
+                            String path = controllerContextPath + method.getAnnotation(PostMapping.class).value();
 
-                            logger.debug("POST {} => {}", path, method.getName());
+                            logger.info("[route] POST {} => {}", path, method.getName());
                             postMappings.put(path, new PostDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes(), new JsonConverter()));
                         } else {
-                            String path = method.getAnnotation(PutMapping.class).value();
+                            String path = controllerContextPath + method.getAnnotation(PutMapping.class).value();
 
-                            logger.debug("PUT {} => {}", path, method.getName());
+                            logger.info("[route] PUT {} => {}", path, method.getName());
                             putMappings.put(path, new PutDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes(), new JsonConverter()));
                         }
                     }
