@@ -3,10 +3,7 @@ package top.xiqiu.north.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.annotation.*;
-import top.xiqiu.north.support.DeleteDispatcher;
-import top.xiqiu.north.support.GetDispatcher;
-import top.xiqiu.north.support.PostDispatcher;
-import top.xiqiu.north.support.PutDispatcher;
+import top.xiqiu.north.support.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +29,11 @@ public class RouteHandler {
      * post routes
      */
     private final static Map<String, PostDispatcher> postMappings = new HashMap<>();
+
+    /**
+     * request routes
+     */
+    private final static Map<String, PostDispatcher> requestMappings = new HashMap<>();
 
     /**
      * put routes
@@ -97,7 +99,9 @@ public class RouteHandler {
                             logger.info("[route] DELETE {} => {}", path, method);
                             deleteMappings.put(path, new DeleteDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
                         }
-                    } else if (method.getAnnotation(PostMapping.class) != null || method.getAnnotation(PutMapping.class) != null) {
+                    } else if (method.getAnnotation(PostMapping.class) != null
+                            || method.getAnnotation(RequestMapping.class) != null
+                            || method.getAnnotation(PutMapping.class) != null) {
                         // // 检查返回值类型
                         // if (method.getReturnType() != ModelAndView.class && method.getReturnType() != void.class) {
                         //     throw new UnsupportedOperationException("Unsupported return type:" + method.getReturnType() + " for method:" + method);
@@ -124,6 +128,11 @@ public class RouteHandler {
 
                             logger.info("[route] POST {} => {}", path, method.getName());
                             postMappings.put(path, new PostDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes(), new JsonConverter()));
+                        } else if (method.getAnnotation(RequestMapping.class) != null) {
+                            String path = controllerContextPath + method.getAnnotation(RequestMapping.class).value();
+
+                            logger.info("[route] REQUEST {} => {}", path, method.getName());
+                            requestMappings.put(path, new RequestDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes(), new JsonConverter()));
                         } else {
                             String path = controllerContextPath + method.getAnnotation(PutMapping.class).value();
 
@@ -138,19 +147,35 @@ public class RouteHandler {
         }
     }
 
-    public static Map<String, GetDispatcher> getGetMappings() {
-        return getMappings;
-    }
+    /**
+     * 查找相关的路由处理器
+     *
+     * @param method 网络请求method
+     * @param path   请求路径
+     */
+    public static MethodDispatcher findDispatcher(String method, String path) {
+        MethodDispatcher dispatcher = null;
+        switch (method) {
+            case "get":
+                dispatcher = getMappings.get(path);
+                break;
+            case "post":
+                dispatcher = postMappings.get(path);
+                break;
+            case "put":
+                dispatcher = putMappings.get(path);
+                break;
+            case "delete":
+                dispatcher = deleteMappings.get(path);
+                break;
+        }
 
-    public static Map<String, PostDispatcher> getPostMappings() {
-        return postMappings;
-    }
+        // @RequestMapping 如果和普通 get/post/put/delete 重复，那么优先走普通 mapping
+        if (dispatcher != null) {
+            return dispatcher;
+        }
 
-    public static Map<String, PutDispatcher> getPutMappings() {
-        return putMappings;
-    }
-
-    public static Map<String, DeleteDispatcher> getDeleteMappings() {
-        return deleteMappings;
+        // 返回 requestMappings 的处理器，但也可能路径还是不存在，最后还是返回 null，匹配失败
+        return requestMappings.get(path);
     }
 }

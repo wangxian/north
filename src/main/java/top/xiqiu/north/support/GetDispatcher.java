@@ -68,7 +68,7 @@ public class GetDispatcher implements MethodDispatcher {
             } else if (parameterClass == Boolean.class) {
                 arguments[i] = Boolean.valueOf(getOrDefault(request, parameterName, "0"));
             } else if (parameterClass == String.class) {
-                arguments[i] = String.valueOf(getOrDefault(request, parameterName, "0"));
+                arguments[i] = String.valueOf(getOrDefault(request, parameterName, ""));
             } else {
                 throw new RuntimeException("invalid parameter class type: " + parameterClass);
             }

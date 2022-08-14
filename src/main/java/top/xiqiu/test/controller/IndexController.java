@@ -1,9 +1,6 @@
 package top.xiqiu.test.controller;
 
-import top.xiqiu.north.annotation.Controller;
-import top.xiqiu.north.annotation.DeleteMapping;
-import top.xiqiu.north.annotation.GetMapping;
-import top.xiqiu.north.annotation.PutMapping;
+import top.xiqiu.north.annotation.*;
 import top.xiqiu.north.core.ModelAndView;
 import top.xiqiu.test.entity.Login;
 import top.xiqiu.test.entity.User;
@@ -26,6 +23,16 @@ public class IndexController {
         // // test jsp view engine
         // String user = "guest";
         // return new ModelAndView("test.jsp", "user", user);
+    }
+
+    /**
+     * 测试 @RequestMapping
+     * curl -X GET http://127.0.0.1:8080/request/mapping?name=guest
+     * curl -X POST http://127.0.0.1:8080/request/mapping?name=guest
+     */
+    @RequestMapping("/request/mapping")
+    public String requestMapping(String name) {
+        return "user:" + name + "\nnow=" + (new Date()).toLocaleString();
     }
 
     @GetMapping("/hello")

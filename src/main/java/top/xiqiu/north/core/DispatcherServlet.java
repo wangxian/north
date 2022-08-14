@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Map;
 
 // @WebServlet(urlPatterns = "/")
 public class DispatcherServlet extends HttpServlet {
@@ -44,18 +43,18 @@ public class DispatcherServlet extends HttpServlet {
     /**
      * 统一调度请求及相应结果
      *
-     * @param req           请求
-     * @param resp          响应
-     * @param dispatcherMap 路由表
+     * @param req    请求
+     * @param resp   响应
+     * @param method 网络请求method
      */
-    private void dispatch(HttpServletRequest req, HttpServletResponse resp, Map<String, ? extends MethodDispatcher> dispatcherMap)
+    private void dispatch(HttpServletRequest req, HttpServletResponse resp, String method)
             throws IOException, ServletException {
 
         // 去除 path 中 context 路径的干扰
         String path = req.getRequestURI().substring(req.getContextPath().length());
 
         // 查找相关的路由处理器
-        MethodDispatcher methodDispatcher = dispatcherMap.get(path);
+        MethodDispatcher methodDispatcher = RouteHandler.findDispatcher(method, path);
 
         // 路由调度不存在，响应 404 page
         if (methodDispatcher == null) {
@@ -97,6 +96,12 @@ public class DispatcherServlet extends HttpServlet {
 
             // 渲染视图
             this.viewEngine.render(modelAndView, req, resp);
+        } else if (invokeResult instanceof String) {
+            // 响应为文本字符串
+            resp.setContentType("text/plain");
+            resp.setCharacterEncoding("UTF-8");
+
+            resp.getWriter().write(invokeResult.toString());
         } else {
             // 数据视图，设置响应为 json 类型
             resp.setContentType("application/json");
@@ -114,27 +119,27 @@ public class DispatcherServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doGet(req, resp);
         logger.debug("GET {}", req.getRequestURI());
-        dispatch(req, resp, RouteHandler.getGetMappings());
+        dispatch(req, resp, "get");
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doPost(req, resp);
         logger.debug("POST {}", req.getRequestURI());
-        dispatch(req, resp, RouteHandler.getPostMappings());
+        dispatch(req, resp, "post");
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doPut(req, resp);
         logger.debug("PUT {}", req.getRequestURI());
-        dispatch(req, resp, RouteHandler.getPutMappings());
+        dispatch(req, resp, "put");
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doDelete(req, resp);
         logger.debug("DELETE {}", req.getRequestURI());
-        dispatch(req, resp, RouteHandler.getDeleteMappings());
+        dispatch(req, resp, "delete");
     }
 }
