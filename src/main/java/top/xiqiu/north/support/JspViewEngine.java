@@ -18,6 +18,12 @@ public class JspViewEngine implements ViewEngine {
 
     @Override
     public void render(ModelAndView modelAndView, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher(modelAndView.getView()).forward(req, resp);
+        // 默认视图挂载到 WEB-INF 下
+        String view = "/WEB-INF/templates/" + modelAndView.getView();
+
+        // 设置模版变量
+        modelAndView.getModel().forEach((key, value) -> req.setAttribute(key, value));
+
+        req.getRequestDispatcher(view).forward(req, resp);
     }
 }

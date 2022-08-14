@@ -22,6 +22,10 @@ public class IndexController {
     public ModelAndView index(HttpSession session) {
         User user = (User) session.getAttribute("user");
         return new ModelAndView("index.html", "user", user);
+
+        // // test jsp view engine
+        // String user = "guest";
+        // return new ModelAndView("test.jsp", "user", user);
     }
 
     @GetMapping("/hello")

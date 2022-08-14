@@ -2,6 +2,8 @@ package top.xiqiu.north.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.xiqiu.north.North;
+import top.xiqiu.north.support.JspViewEngine;
 import top.xiqiu.north.support.MethodDispatcher;
 import top.xiqiu.north.support.PebbleViewEngine;
 import top.xiqiu.north.support.ViewEngine;
@@ -31,7 +33,12 @@ public class DispatcherServlet extends HttpServlet {
         logger.info("{} init ...", getClass().getSimpleName());
 
         // 初始化模版引擎
-        this.viewEngine = new PebbleViewEngine(getServletContext());
+        String viewEngine = North.config().get("north.view-engine", "pebble");
+        if ("jsp".equals(viewEngine)) {
+            this.viewEngine = new PebbleViewEngine(getServletContext());
+        } else {
+            this.viewEngine = new JspViewEngine(getServletContext());
+        }
     }
 
     /**

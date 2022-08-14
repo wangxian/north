@@ -5,6 +5,8 @@
   <title>测试</title>
 </head>
 <body>
-当前时间：<%= new Date() %>
+当前时间：<%= new Date() %> <br/>
+user: <%= request.getAttribute("user") %><br/>
+user: ${user}<br/>
 </body>
 </html>
