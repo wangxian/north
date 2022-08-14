@@ -73,9 +73,15 @@ public class North {
         // 预处理 xxxMapping 注解
         RouteHandler.processMappings();
 
-        // Start tomcat server
+        // 做一些启动前的准备
         _prepareServer();
-        _supportJsp();
+
+        // 是否支持 jsp，不使用 jsp 作为模版引擎的时候，可以不设置支持 jsp
+        if ("jsp".equals(North.config().get("north.view-engine", "pebble"))) {
+            _supportJsp();
+        }
+
+        // 启动内置web服务器
         _startServer();
     }
 
@@ -107,7 +113,6 @@ public class North {
         // tomcat.getConnector().setProperty("maxThreads", "1000");
         // 允许最大连接数，当达到临界值时，系统可能会基于accept-count继续接受连接，默认10000
         // tomcat.getConnector().setProperty("maxConnections", "10000");
-
 
         // Set doc base
         tomcat.getHost().setAppBase(DOC_BASE);
@@ -162,7 +167,7 @@ public class North {
         tomcat.addServlet(DEFAULT_CONTEXT_PATH, "north-dispatcher", new DispatcherServlet());
         context.addServletMappingDecoded("/", "north-dispatcher");
 
-        // Serve static files
+        // Serve static files & favicon.ico
         tomcat.addServlet(DEFAULT_CONTEXT_PATH, "static-files", new FileServerServlet());
         context.addServletMappingDecoded("/static/*", "static-files");
         context.addServletMappingDecoded("/favicon.ico", "static-files");

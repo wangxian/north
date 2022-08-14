@@ -32,11 +32,11 @@ public class DispatcherServlet extends HttpServlet {
         // super.init();
         logger.info("{} init ...", getClass().getSimpleName());
 
-        // 初始化模版引擎
+        // 初始化模版引擎，如果在配置中设置 north.view-engine = no 则相当于禁用模版引擎
         String viewEngine = North.config().get("north.view-engine", "pebble");
-        if ("jsp".equals(viewEngine)) {
+        if ("pebble".equals(viewEngine)) {
             this.viewEngine = new PebbleViewEngine(getServletContext());
-        } else {
+        } else if ("jsp".equals(viewEngine)) {
             this.viewEngine = new JspViewEngine(getServletContext());
         }
     }
@@ -88,6 +88,11 @@ public class DispatcherServlet extends HttpServlet {
             if (modelAndView.getView().startsWith("redirect:")) {
                 resp.sendRedirect(modelAndView.getView().substring(9));
                 return;
+            }
+
+            // 如果模版引擎被禁用，而在控制器中选择渲染视图，则抛出错误
+            if (this.viewEngine == null) {
+                throw new NorthException("模版引擎未被正确初始化（可能在配置中被禁用），渲染模版失败～");
             }
 
             // 渲染视图
