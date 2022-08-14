@@ -1,7 +1,6 @@
 package top.xiqiu.north.support;
 
 import top.xiqiu.north.core.ModelAndView;
-import top.xiqiu.north.core.RouteDispatcher;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -12,7 +11,7 @@ import java.lang.reflect.Method;
 /**
  * GetMapping 注解处理
  */
-public class GetDispatcher implements RouteDispatcher {
+public class GetDispatcher implements MethodDispatcher {
 
     private final Object instance;
     private final Method method;

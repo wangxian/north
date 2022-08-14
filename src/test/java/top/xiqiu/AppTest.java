@@ -169,4 +169,25 @@ public class AppTest {
         }
     }
 
+    private static String testName = "h-1001";
+
+    public Object show() {
+        Object obj = new Object();
+        try {
+            return obj;
+        } finally {
+            System.out.println("执行finally模块");
+            testName = "h-1002";
+            obj      = null;
+        }
+    }
+
+    /**
+     * 测试 finally 的返回值 及改变外部常量
+     */
+    @Test
+    public void testFinally() {
+        logger.info("show={}, testName= {}", show(), testName);
+    }
+
 }

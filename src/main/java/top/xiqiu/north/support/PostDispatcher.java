@@ -2,7 +2,6 @@ package top.xiqiu.north.support;
 
 import top.xiqiu.north.core.JsonConverter;
 import top.xiqiu.north.core.ModelAndView;
-import top.xiqiu.north.core.RouteDispatcher;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,7 +13,7 @@ import java.lang.reflect.Method;
 /**
  * PostMapping 注解处理
  */
-public class PostDispatcher implements RouteDispatcher {
+public class PostDispatcher implements MethodDispatcher {
 
     private final Object instance;
     private final Method method;

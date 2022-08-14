@@ -21,7 +21,7 @@ public class ScanClassWithAnnotations {
     /**
      * logger
      **/
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScanClassWithAnnotations.class);
+    private static final Logger logger = LoggerFactory.getLogger(ScanClassWithAnnotations.class);
 
     /**
      * 存储 扫描到的控制器(controllers)
@@ -49,7 +49,7 @@ public class ScanClassWithAnnotations {
             String packageDirName = packageName.replace(".", "/");
             dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
         } catch (IOException e) {
-            LOGGER.error("failed to get resources: {}", e.getMessage());
+            logger.error("failed to get resources: {}", e.getMessage());
             // e.printStackTrace();
             return classes;
         }
@@ -71,7 +71,7 @@ public class ScanClassWithAnnotations {
                 try {
                     jarFile = ((JarURLConnection) url.openConnection()).getJarFile();
                 } catch (IOException e) {
-                    LOGGER.error("failed to load jar file", e);
+                    logger.error("failed to load jar file", e);
                     continue;
                 }
 
@@ -115,7 +115,7 @@ public class ScanClassWithAnnotations {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("failed to read class by file path", e);
+            logger.error("failed to read class by file path", e);
             // e.printStackTrace();
         }
     }

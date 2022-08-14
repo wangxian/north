@@ -14,10 +14,7 @@ import org.apache.tomcat.util.scan.StandardJarScanFilter;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.xiqiu.north.core.AppConfig;
-import top.xiqiu.north.core.DispatcherServlet;
-import top.xiqiu.north.core.FileServerServlet;
-import top.xiqiu.north.core.ScanClassWithAnnotations;
+import top.xiqiu.north.core.*;
 
 import java.util.List;
 
@@ -26,7 +23,7 @@ public class North {
     /**
      * logger
      **/
-    private static final Logger LOGGER = LoggerFactory.getLogger(North.class);
+    private static final Logger logger = LoggerFactory.getLogger(North.class);
 
     /**
      * tomcat server + context
@@ -58,7 +55,7 @@ public class North {
     public static void start(Class<?> mainAppClass) {
         // 基本目录，fatjar 路径是 xxx/target/xxx.jar
         APP_CLASS_PATH = mainAppClass.getProtectionDomain().getCodeSource().getLocation().getPath();
-        LOGGER.info("north app classpath = {}", APP_CLASS_PATH);
+        logger.info("north app classpath = {}", APP_CLASS_PATH);
 
         // 在 fatjar 下运行
         if (APP_CLASS_PATH.endsWith(".jar")) {
@@ -68,10 +65,13 @@ public class North {
 
         // 扫描需要预处理的类并处理相关注解
         final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
-        LOGGER.info("扫描到的类 = {}", classes);
+        logger.info("扫描到的类 = {}", classes);
 
         // 处理 @Controller 注解
         ScanClassWithAnnotations.scanAndStoreControllers(classes);
+
+        // 预处理 xxxMapping 注解
+        RouteHandler.processMappings();
 
         // Start tomcat server
         _prepareServer();
@@ -94,7 +94,7 @@ public class North {
         // 设置基础目录，为了安全，指定临时目录
         String tmpdir = System.getProperty("java.io.tmpdir") + "north-tomcat-" + port + "-" + System.currentTimeMillis();
         tomcat.setBaseDir(tmpdir);
-        LOGGER.debug("server.tmpdir={}", tmpdir);
+        logger.debug("server.tmpdir={}", tmpdir);
 
         // Set port, default 8080
         tomcat.setPort(port);
@@ -201,13 +201,13 @@ public class North {
             tomcat.start();
 
             // Leave startup message
-            LOGGER.info("Startup success at http://{}:{}/",
+            logger.info("Startup success at http://{}:{}/",
                         config().get("server.host", "0.0.0.0"),
                         config().getInt("server.port", 8080));
 
             tomcat.getServer().await();
         } catch (LifecycleException e) {
-            LOGGER.error("启动 Tomcat server 失败={}", e.getLocalizedMessage());
+            logger.error("启动 Tomcat server 失败={}", e.getLocalizedMessage());
             e.printStackTrace();
         }
     }
