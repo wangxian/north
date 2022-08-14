@@ -190,4 +190,12 @@ public class AppTest {
         logger.info("show={}, testName= {}", show(), testName);
     }
 
+    @Test
+    public void testMap() {
+        Map<String, Object> user = Map.of();
+        user.put("name", "wx");
+
+        logger.info("user = {}", user);
+    }
+
 }

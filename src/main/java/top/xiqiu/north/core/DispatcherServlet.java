@@ -44,40 +44,55 @@ public class DispatcherServlet extends HttpServlet {
     private void dispatch(HttpServletRequest req, HttpServletResponse resp, Map<String, ? extends MethodDispatcher> dispatcherMap)
             throws IOException, ServletException {
 
+        // 去除 path 中 context 路径的干扰
         String path = req.getRequestURI().substring(req.getContextPath().length());
+
+        // 查找相关的路由处理器
         MethodDispatcher methodDispatcher = dispatcherMap.get(path);
 
-        // 路由调度不存在
+        // 路由调度不存在，响应 404 page
         if (methodDispatcher == null) {
             resp.sendError(404);
             return;
         }
 
         // 执行控制器逻辑
-        ModelAndView modelAndView;
+        Object invokeResult;
         try {
-            modelAndView = methodDispatcher.invoke(req, resp);
+            invokeResult = methodDispatcher.invoke(req, resp);
         } catch (ReflectiveOperationException e) {
-            throw new ServletException(e);
+            throw new NorthException(e);
         }
 
-        // 不渲染视图，支持控制器内自己处理响应
-        if (modelAndView == null) {
+        // 如果处理器的结果为null，表示控制器内部处理，不再继续往下执行
+        if (invokeResult == null) {
             return;
         }
 
-        // 设置响应 html 类型内容
-        resp.setContentType("text/html");
-        resp.setCharacterEncoding("UTF-8");
+        // 是否是模版视图
+        if (invokeResult instanceof ModelAndView) {
+            // 模版视图，设置响应 html 类型内容
+            resp.setContentType("text/html");
+            resp.setCharacterEncoding("UTF-8");
 
-        // 支持控制器 redirect:/user/index 跳转到其他 URL
-        if (modelAndView.getView().startsWith("redirect:")) {
-            resp.sendRedirect(modelAndView.getView().substring(9));
-            return;
+            ModelAndView modelAndView = (ModelAndView) invokeResult;
+
+            // 支持控制器 redirect:/user/index 跳转到其他 URL
+            if (modelAndView.getView().startsWith("redirect:")) {
+                resp.sendRedirect(modelAndView.getView().substring(9));
+                return;
+            }
+
+            // 渲染视图
+            this.viewEngine.render(modelAndView, req, resp);
+        } else {
+            // 数据视图，设置响应为 json 类型
+            resp.setContentType("application/json");
+            resp.setCharacterEncoding("UTF-8");
+
+            String jsonResult = new JsonConverter().stringify(invokeResult);
+            resp.getWriter().write(jsonResult);
         }
-
-        // 渲染视图
-        this.viewEngine.render(modelAndView, req, resp);
 
         // flush thr stream
         resp.getWriter().flush();

@@ -1,7 +1,6 @@
 package top.xiqiu.north.support;
 
 import top.xiqiu.north.core.JsonConverter;
-import top.xiqiu.north.core.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,7 +34,7 @@ public class PostDispatcher implements MethodDispatcher {
     }
 
     @Override
-    public ModelAndView invoke(HttpServletRequest request, HttpServletResponse response) throws IOException, ReflectiveOperationException {
+    public Object invoke(HttpServletRequest request, HttpServletResponse response) throws IOException, ReflectiveOperationException {
         Object[] arguments = new Object[this.parameterClasses.length];
 
         for (int i = 0; i < this.parameterClasses.length; i++) {
@@ -90,6 +89,6 @@ public class PostDispatcher implements MethodDispatcher {
             }
         }
 
-        return (ModelAndView) this.method.invoke(this.instance, arguments);
+        return this.method.invoke(this.instance, arguments);
     }
 }

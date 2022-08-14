@@ -66,10 +66,10 @@ public class RouteHandler {
                 // 处理控制器内的注解方法
                 for (Method method : controllerClass.getMethods()) {
                     if (method.getAnnotation(GetMapping.class) != null || method.getAnnotation(DeleteMapping.class) != null) {
-                        // 检查返回值类型
-                        if (method.getReturnType() != ModelAndView.class && method.getReturnType() != void.class) {
-                            throw new UnsupportedOperationException("Unsupported return type:" + method.getReturnType() + " for method:" + method);
-                        }
+                        // // 检查返回值类型
+                        // if (method.getReturnType() != ModelAndView.class && method.getReturnType() != void.class) {
+                        //     throw new UnsupportedOperationException("Unsupported return type:" + method.getReturnType() + " for method:" + method);
+                        // }
 
                         // 检查形参类型
                         // noinspection DuplicatedCode
@@ -94,10 +94,10 @@ public class RouteHandler {
                             deleteMappings.put(path, new DeleteDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
                         }
                     } else if (method.getAnnotation(PostMapping.class) != null || method.getAnnotation(PutMapping.class) != null) {
-                        // 检查返回值类型
-                        if (method.getReturnType() != ModelAndView.class && method.getReturnType() != void.class) {
-                            throw new UnsupportedOperationException("Unsupported return type:" + method.getReturnType() + " for method:" + method);
-                        }
+                        // // 检查返回值类型
+                        // if (method.getReturnType() != ModelAndView.class && method.getReturnType() != void.class) {
+                        //     throw new UnsupportedOperationException("Unsupported return type:" + method.getReturnType() + " for method:" + method);
+                        // }
 
                         // 检查形参类型（不允许多个 entity 类型行参，否则不能识别那个是那个啦）
                         // noinspection DuplicatedCode
