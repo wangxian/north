@@ -55,7 +55,7 @@ public class North {
     public static void start(Class<?> mainAppClass) {
         // 基本目录，fatjar 路径是 xxx/target/xxx.jar
         APP_CLASS_PATH = mainAppClass.getProtectionDomain().getCodeSource().getLocation().getPath();
-        logger.info("north app classpath = {}", APP_CLASS_PATH);
+        logger.info("[north] app.classpath = {}", APP_CLASS_PATH);
 
         // 在 fatjar 下运行
         if (APP_CLASS_PATH.endsWith(".jar")) {
@@ -63,9 +63,13 @@ public class North {
             System.out.println(mainAppClass.getProtectionDomain().getCodeSource().getLocation().toString());
         }
 
+        if (isAppRunInJar) {
+            logger.info("[north] north.version = {}", config().getNorthVersion());
+        }
+
         // 扫描需要预处理的类并处理相关注解
         final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
-        logger.info("扫描到的类 = {}", classes);
+        logger.info("[north] 扫描到的类 = {}", classes);
 
         // 处理 @Controller 注解
         ScanClassWithAnnotations.scanAndStoreControllers(classes);
@@ -100,7 +104,7 @@ public class North {
         // 设置基础目录，为了安全，指定临时目录
         String tmpdir = System.getProperty("java.io.tmpdir") + "north-tomcat-" + port + "-" + System.currentTimeMillis();
         tomcat.setBaseDir(tmpdir);
-        logger.debug("server.tmpdir={}", tmpdir);
+        logger.debug("[north] server.tmpdir={}", tmpdir);
 
         // Set port, default 8080
         tomcat.setPort(port);
@@ -206,7 +210,7 @@ public class North {
             tomcat.start();
 
             // Leave startup message
-            logger.info("Startup success at http://{}:{}/",
+            logger.info("[north] startup success at http://{}:{}/",
                         config().get("server.host", "0.0.0.0"),
                         config().getInt("server.port", 8080));
 

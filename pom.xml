@@ -6,7 +6,7 @@
 
   <groupId>top.xiqiu</groupId>
   <artifactId>north</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
   <packaging>jar</packaging>
 
   <name>north</name>
@@ -61,10 +61,6 @@
   <build>
     <finalName>${project.name}</finalName>
     <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
     </resources>
 
     <plugins>
