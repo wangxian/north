@@ -48,11 +48,18 @@ public class North {
     public static boolean isAppRunInJar = false;
 
     /**
+     * 记录启动时间（计算启动耗时）
+     */
+    private static long _startTime = 0;
+
+    /**
      * 启动 Webapp
      *
      * @param mainAppClass 主入口class
      */
     public static void start(Class<?> mainAppClass) {
+        _startTime = System.currentTimeMillis();
+
         // 基本目录，fatjar 路径是 xxx/target/xxx.jar
         APP_CLASS_PATH = mainAppClass.getProtectionDomain().getCodeSource().getLocation().getPath();
         logger.info("[north] app.classpath = {}", APP_CLASS_PATH);
@@ -210,7 +217,8 @@ public class North {
             tomcat.start();
 
             // Leave startup message
-            logger.info("[north] startup success at http://{}:{}/",
+            logger.info("[north] startup.time.cost={}ms | startup success at http://{}:{}/",
+                        System.currentTimeMillis() - _startTime,
                         config().get("server.host", "0.0.0.0"),
                         config().getInt("server.port", 8080));
 
