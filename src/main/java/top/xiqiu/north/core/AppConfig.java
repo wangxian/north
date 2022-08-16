@@ -11,6 +11,11 @@ public class AppConfig extends Properties {
     private static AppConfig _appConfig;
 
     /**
+     * app version
+     */
+    private String appVersion = "";
+
+    /**
      * 初始化配置（单例）
      */
     public static AppConfig init() {
@@ -33,6 +38,10 @@ public class AppConfig extends Properties {
             // 加载系统 env 环境变量
             // 优先级：环境变量 > application.properties > Java系统属性
             System.getenv().forEach((key, value) -> _appConfig.setProperty(key.toLowerCase(), value));
+
+            // 获取当前应用 maven 配置的版本号
+            _appConfig.appVersion = AppConfig.class.getPackage().getImplementationVendor();
+            System.out.println("_appConfig.appVersion = " + _appConfig.appVersion);
         }
 
         return _appConfig;
@@ -98,5 +107,9 @@ public class AppConfig extends Properties {
         } else {
             return convert.apply(temp);
         }
+    }
+
+    private String getAppVersion() {
+        return appVersion;
     }
 }

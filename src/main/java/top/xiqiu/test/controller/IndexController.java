@@ -32,7 +32,7 @@ public class IndexController {
      */
     @RequestMapping("/request/mapping")
     public String requestMapping(String name) {
-        return "user:" + name + "\nnow=" + (new Date()).toLocaleString();
+        return "user:" + name + "\nnow=" + new Date();
     }
 
     @GetMapping("/hello")
