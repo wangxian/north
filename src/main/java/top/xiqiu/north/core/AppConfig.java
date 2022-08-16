@@ -36,15 +36,15 @@ public class AppConfig extends Properties {
             } catch (IOException e) {
             }
 
-            // // 获取north当前版本号 - 注意：只有在fatjar下生效
-            // try (InputStream resourceAsStream = _appConfig.getClass().getClassLoader().getResourceAsStream("META-INF/maven/top.xiqiu/north/pom.properties")) {
-            //     if (resourceAsStream != null) {
-            //         Properties northPkgInfo = new Properties();
-            //         northPkgInfo.load(resourceAsStream);
-            //         _appConfig.northVersion = northPkgInfo.getProperty("version");
-            //     }
-            // } catch (IOException e) {
-            // }
+            // 获取north当前版本号 - 注意：只有在fatjar下生效
+            try (InputStream resourceAsStream = _appConfig.getClass().getClassLoader().getResourceAsStream("META-INF/maven/top.xiqiu/north/pom.properties")) {
+                if (resourceAsStream != null) {
+                    Properties northPkgInfo = new Properties();
+                    northPkgInfo.load(resourceAsStream);
+                    _appConfig.northVersion = northPkgInfo.getProperty("version");
+                }
+            } catch (IOException e) {
+            }
 
             // 加载系统 env 环境变量
             // 优先级：环境变量 > application.properties > Java系统属性
