@@ -196,6 +196,15 @@ public class AppTest {
         user.put("name", "wx");
 
         logger.info("user = {}", user);
+
+        // String key = "NORTH_ABC_DEF";
+        // key = key.toLowerCase();
+        // if (key.startsWith("north")) {
+        //     // key = key.replace("_", ".");
+        //     key = key.replaceAll("_", ".");
+        // }
+        //
+        // System.out.println(key);
     }
 
 }
