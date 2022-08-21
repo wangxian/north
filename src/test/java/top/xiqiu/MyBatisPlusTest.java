@@ -31,9 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -195,6 +193,7 @@ public class MyBatisPlusTest {
         dataSource.setMaxLifetime(60000 * 10);
         dataSource.setConnectionTestQuery("SELECT 1");
 
+        // 创建数据库
         try {
             Connection connection = dataSource.getConnection();
             Statement statement = connection.createStatement();
@@ -206,6 +205,26 @@ public class MyBatisPlusTest {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        // 查询数据库状态
+        try {
+            Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement("show tables");
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                ResultSetMetaData metaData = resultSet.getMetaData();
+                int columnCount = metaData.getColumnCount();
+                for (int i = 1; i <= columnCount; i++) {
+                    String name = metaData.getColumnLabel(i);
+                    String field = resultSet.getString(i);
+                    System.out.printf("%s:%s\n", name, field);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
 
         return dataSource;
     }
