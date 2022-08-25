@@ -2,6 +2,7 @@ package top.xiqiu.north.db;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,14 +39,6 @@ public class DbTemplate {
 
         final ArgsTypePreparedStatementSetter setter = new ArgsTypePreparedStatementSetter(args, argTypes);
         preparedStatement = new SimplePreparedStatementCreator(setter, sql).createPreparedStatement(connection);
-    }
-
-    /**
-     * 查询记录集
-     */
-    private ResultSet query(String sql, Object[] args, int[] argTypes) throws SQLException {
-        getDefaultPreparedStatement(sql, args, argTypes);
-        return preparedStatement.executeQuery(sql);
     }
 
     /**
@@ -289,6 +282,220 @@ public class DbTemplate {
     }
 
     /**
+     * 查询记录集
+     */
+    public ResultSet query(String sql, Object[] args, int[] argTypes) throws SQLException {
+        getDefaultPreparedStatement(sql, args, argTypes);
+        return preparedStatement.executeQuery(sql);
+    }
+
+    /**
+     * 查询记录集
+     */
+    public <T> List<T> query(String sql, RowMapper<T> rowMapper) {
+        return this.query(new SimplePreparedStatementCreator(new ArgsTypePreparedStatementSetter(null, null), sql), rowMapper);
+    }
+
+    /**
+     * 查询记录集
+     */
+    public void query(String sql, RowCallbackHandler rowCallbackHandler) {
+        this.query(new SimplePreparedStatementCreator(new ArgsTypePreparedStatementSetter(null, null), sql), rowCallbackHandler);
+    }
+
+    /**
+     * 查询记录集
+     */
+    public <T> T query(String sql, ResultSetExtractor<T> resultSetExtractor) {
+        return this.query(sql, null, null, resultSetExtractor);
+    }
+
+    /**
+     * 查询记录集
+     */
+    public <T> T query(String sql, PreparedStatementSetter setter, ResultSetExtractor<T> resultSetExtractor) {
+        return this.query(new SimplePreparedStatementCreator(setter, sql), resultSetExtractor);
+    }
+
+    /**
+     * 查询记录集
+     */
+    public <T> T query(String sql, Object[] args, ResultSetExtractor<T> resultSetExtractor) {
+        return this.query(sql, args, null, resultSetExtractor);
+    }
+
+    /**
+     * 查询记录集
+     */
+    public <T> T query(String sql, ResultSetExtractor<T> resultSetExtractor, Object... args) {
+        return this.query(sql, args, resultSetExtractor);
+    }
+
+    /**
+     * 查询记录集
+     */
+    public void query(String sql, Object[] args, RowCallbackHandler rowCallbackHandler) {
+        this.query(sql, args, null, rowCallbackHandler);
+    }
+
+    /**
+     * 查询记录集
+     */
+    public void query(String sql, RowCallbackHandler rowCallbackHandler, Object... args) {
+        this.query(sql, args, rowCallbackHandler);
+    }
+
+    /**
+     * 查询记录集
+     */
+    public void query(String sql, PreparedStatementSetter setter, RowCallbackHandler rowCallbackHandler) {
+        this.query(new SimplePreparedStatementCreator(setter, sql), rowCallbackHandler);
+    }
+
+    /**
+     * 查询记录集
+     */
+    public <T> List<T> query(String sql, PreparedStatementSetter preparedStatementSetter, RowMapper<T> rowMapper) {
+        return this.query(new SimplePreparedStatementCreator(preparedStatementSetter, sql), rowMapper);
+    }
+
+    /**
+     * 查询记录集
+     */
+    public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) {
+        return this.query(sql, args, null, rowMapper);
+    }
+
+    /**
+     * 查询记录集
+     */
+    public <T> List<T> query(String sql, RowMapper<T> rowMapper, Object... args) {
+        return this.query(sql, args, rowMapper);
+    }
+
+    /**
+     * 查询记录集 - RowMapper
+     */
+    public <T> List<T> query(PreparedStatementCreator preparedStatementCreator, RowMapper<T> rowMapper) {
+        ArrayList<T> arrayList = new ArrayList<>();
+
+        try {
+            connection        = dataSource.getConnection();
+            preparedStatement = preparedStatementCreator.createPreparedStatement(connection);
+            resultSet         = preparedStatement.executeQuery();
+
+            int rowNum = 0;
+            while (resultSet.next()) {
+                final T t = rowMapper.mapRow(resultSet, ++rowNum);
+                arrayList.add(t);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.cleanUp();
+        }
+
+        return arrayList;
+    }
+
+    /**
+     * 查询记录集 - RowMapper - args + argTypes
+     */
+    public <T> List<T> query(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) {
+        ArrayList<T> arrayList = new ArrayList<>();
+
+        try {
+            resultSet = this.query(sql, args, argTypes);
+
+            int rowNum = 0;
+            while (resultSet.next()) {
+                final T t = rowMapper.mapRow(resultSet, ++rowNum);
+                arrayList.add(t);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.cleanUp();
+        }
+
+        return arrayList;
+    }
+
+    /**
+     * 查询记录集 - RowCallbackHandler
+     */
+    public void query(PreparedStatementCreator preparedStatementCreator, RowCallbackHandler rowCallbackHandler) {
+        try {
+            connection        = dataSource.getConnection();
+            preparedStatement = preparedStatementCreator.createPreparedStatement(connection);
+            resultSet         = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                rowCallbackHandler.processRow(resultSet);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.cleanUp();
+        }
+    }
+
+    /**
+     * 查询记录集 - ResultSetExtractor
+     */
+    public <T> T query(PreparedStatementCreator preparedStatementCreator, ResultSetExtractor<T> resultSetExtractor) {
+        T result = null;
+
+        try {
+            connection        = dataSource.getConnection();
+            preparedStatement = preparedStatementCreator.createPreparedStatement(connection);
+            resultSet         = preparedStatement.executeQuery();
+
+            result = resultSetExtractor.extractData(resultSet);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.cleanUp();
+        }
+
+        return result;
+    }
+
+    /**
+     * 查询记录集 - ResultSetExtractor - args + argTypes
+     */
+    public <T> T query(String sql, Object[] args, int[] argTypes, ResultSetExtractor<T> resultSetExtractor) {
+        T result = null;
+
+        try {
+            resultSet = this.query(sql, args, argTypes);
+            result    = resultSetExtractor.extractData(resultSet);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.cleanUp();
+        }
+
+        return result;
+    }
+
+    /**
+     * 查询记录集 - RowCallbackHandler - args + argTypes
+     */
+    public void query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rowCallbackHandler) {
+        try {
+            resultSet = this.query(sql, args, argTypes);
+            while (resultSet.next()) {
+                rowCallbackHandler.processRow(resultSet);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.cleanUp();
+        }
+    }
+
+    /**
      * 返回一个 JavaBean
      */
     public <T> T queryForObject(String sql, Class<T> requiredType) {
@@ -296,6 +503,12 @@ public class DbTemplate {
     }
 
     public <T> T queryForObject(String sql, Object[] args, Class<T> requiredType) {
+        // return this.query(sql, args, new ResultSetExtractor() {
+        //     @Override
+        //     public Object extractData(ResultSet rs) throws SQLException {
+        //         return null;
+        //     }
+        // });
         return null;
     }
 
