@@ -21,15 +21,15 @@ public class ArgsTypePreparedStatementSetter implements PreparedStatementSetter 
     }
 
     @Override
-    public void setValues(PreparedStatement ps) throws SQLException {
+    public void setValues(PreparedStatement preparedStatement) throws SQLException {
         // 指定绑定参数的类型，类型的枚举值定义在 java.sql.Types，类似：Types.VARCHAR
         if (args != null && args.length > 0 && argTypes != null && argTypes.length > 0) {
             for (int i = 0; i < args.length; i++) {
-                ps.setObject(i + 1, args[i], argTypes[i]);
+                preparedStatement.setObject(i + 1, args[i], argTypes[i]);
             }
         } else if (args != null && args.length > 0) {
             for (int i = 0; i < args.length; i++) {
-                ps.setObject(i + 1, args[i]);
+                preparedStatement.setObject(i + 1, args[i]);
             }
         }
     }

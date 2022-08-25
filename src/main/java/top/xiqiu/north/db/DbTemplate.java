@@ -2,6 +2,7 @@ package top.xiqiu.north.db;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.List;
 
 /**
  * 数据库简单操作类
@@ -48,28 +49,9 @@ public class DbTemplate {
     }
 
     /**
-     * 更新、删除操作，返回受影响的行数
-     */
-    private int update(String sql, Object[] args, int[] argTypes) {
-        int affectedRows = 0;
-
-        try {
-            getDefaultPreparedStatement(sql, args, argTypes);
-            affectedRows = preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            // 已到调用终点，清理资源占用
-            this.clean();
-        }
-
-        return affectedRows;
-    }
-
-    /**
      * 清理使用过的操作资源语柄
      */
-    private void clean() {
+    private void cleanUp() {
         try {
             if (resultSet != null) {
                 resultSet.close();
@@ -106,6 +88,36 @@ public class DbTemplate {
     }
 
     /**
+     * 执行更新、删除操作，返回影响行数
+     *
+     * @param sql  SQL语句
+     * @param args 形参的展开列表
+     * @return 影响行数
+     */
+    public int update(String sql, Object... args) {
+        return this.update(sql, args, null);
+    }
+
+    /**
+     * 更新、删除操作，返回受影响的行数
+     */
+    public int update(String sql, Object[] args, int[] argTypes) {
+        int affectedRows = 0;
+
+        try {
+            getDefaultPreparedStatement(sql, args, argTypes);
+            affectedRows = preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // 已到调用终点，清理资源占用
+            this.cleanUp();
+        }
+
+        return affectedRows;
+    }
+
+    /**
      * 更新、删除操作，返回受影响的行数
      */
     public int update(PreparedStatementCreator preparedStatementCreator) {
@@ -119,9 +131,8 @@ public class DbTemplate {
             e.printStackTrace();
         } finally {
             // 已到调用终点，清理资源占用
-            this.clean();
+            this.cleanUp();
         }
-
 
         return affectedRows;
     }
@@ -154,16 +165,111 @@ public class DbTemplate {
             e.printStackTrace();
         } finally {
             // 已到调用终点，清理资源占用
-            this.clean();
+            this.cleanUp();
         }
 
         return affectedRows;
     }
 
     /**
-     * 执行批量更新，参数为string数组
+     * 更新、删除操作，返回受影响的行数
      */
-    public void batchUpdate() {
+    public int update(String sql, PreparedStatementSetter setter) {
+        int affectedRows = 0;
+
+        try {
+            connection        = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            setter.setValues(preparedStatement);
+            affectedRows = preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // 已到调用终点，清理资源占用
+            this.cleanUp();
+        }
+
+        return affectedRows;
+    }
+
+    /**
+     * 执行批量更新，参数为 String[] 数组
+     * 性能好
+     */
+    public int[] batchUpdate(final String[] sql) {
+        int[] affectedRowsArray = null;
+
+        try {
+            connection = dataSource.getConnection();
+            statement  = connection.createStatement();
+
+            for (String s : sql) {
+                statement.addBatch(s);
+            }
+
+            affectedRowsArray = statement.executeBatch();
+            statement.clearBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.cleanUp();
+        }
+
+        return affectedRowsArray;
+    }
+
+    /**
+     * 执行批量更新 - 批量更新 - 预处理SQL - 回调的方式
+     */
+    public int[] batchUpdate(final String sql, final BatchPreparedStatementSetter batchPreparedStatementSetter) {
+        int[] affectedRowsArray = null;
+
+        try {
+            connection        = this.dataSource.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+
+            for (int i = 0; i < batchPreparedStatementSetter.size(); i++) {
+                batchPreparedStatementSetter.setValues(preparedStatement, i);
+                preparedStatement.addBatch();
+            }
+
+            affectedRowsArray = preparedStatement.executeBatch();
+            preparedStatement.clearBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.cleanUp();
+        }
+
+        return affectedRowsArray;
+    }
+
+    /**
+     * 批量更新 - 批量更新（指定参数类型）- 预处理SQL
+     *
+     * @param args 参数列表，注意：Object[] 为一次SQL需要的参数，故外层还有一个 List<> 结构
+     */
+    public int[] batchUpdate(final String sql, List<Object[]> args, int[] argTypes) {
+        return this.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement preparedStatement, int index) throws SQLException {
+                Object[] argsItem = args.get(index);
+                ArgsTypePreparedStatementSetter setter = new ArgsTypePreparedStatementSetter(argsItem, argTypes);
+                setter.setValues(preparedStatement);
+            }
+
+            @Override
+            public int size() {
+                return args.size();
+            }
+        });
+    }
+
+    /**
+     * 批量更新 - 不指定参数类型 - 预处理SQL
+     */
+    public int[] batchUpdate(final String sql, List<Object[]> args) {
+        return this.batchUpdate(sql, args, null);
     }
 
     /**
