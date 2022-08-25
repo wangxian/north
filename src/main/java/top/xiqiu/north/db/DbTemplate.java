@@ -3,7 +3,9 @@ package top.xiqiu.north.db;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据库简单操作类
@@ -496,54 +498,166 @@ public class DbTemplate {
     }
 
     /**
-     * 返回一个 JavaBean
+     * 对象查询 - Bean
      */
     public <T> T queryForObject(String sql, Class<T> requiredType) {
         return queryForObject(sql, null, requiredType);
     }
 
+    /**
+     * 对象查询 - Bean - 有参数
+     */
     public <T> T queryForObject(String sql, Object[] args, Class<T> requiredType) {
-        // return this.query(sql, args, new ResultSetExtractor() {
-        //     @Override
-        //     public Object extractData(ResultSet rs) throws SQLException {
-        //         return null;
-        //     }
-        // });
-        return null;
-    }
+        return this.query(sql, args, new ResultSetExtractor<T>() {
+            @Override
+            public T extractData(ResultSet rs) throws SQLException {
+                T result = null;
+                if (rs.next()) {
+                    // @TODO 需优化，使用类型强制转换，可能转换失败而报错
+                    result = (T) rs.getObject(1);
+                }
 
-    public <T> T queryForObject(String sql, RowMapper<T> rowMapper) {
-        return null;
-    }
-
-    public <T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) {
-        return null;
-    }
-
-    public <T> T queryForObject(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) {
-        return null;
-    }
-
-    public <T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args) {
-        return null;
+                return result;
+            }
+        });
     }
 
     /**
-     * 返回一个 List<Map<String, Object>>
+     * 对象查询 - Bean - 无参数
      */
-    public void queryForList() {
-
+    public <T> T queryForObject(String sql, RowMapper<T> rowMapper) {
+        return this.queryForObject(sql, null, rowMapper);
     }
 
-    public void queryForMap() {
+    /**
+     * 对象查询 - Bean - 有参数 - RowMapper
+     */
+    public <T> T queryForObject(String sql, RowMapper<T> rowMapper, Object[]... args) {
+        return this.queryForObject(sql, args, rowMapper);
+    }
 
+    /**
+     * 对象查询 - Bean - 有参数 - RowMapper
+     */
+    public <T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) {
+        return this.queryForObject(sql, args, null, rowMapper);
+    }
+
+    /**
+     * 对象查询 - Bean - args - RowMapper
+     */
+    public <T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args) {
+        return this.queryForObject(sql, args, rowMapper);
+    }
+
+    /**
+     * 对象查询 - Bean - args + argTypes - RowMapper
+     */
+    public <T> T queryForObject(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) {
+        // 只查询一条
+        if (sql != null && !sql.toLowerCase().contains(" limit ")) {
+            sql = sql + " LIMIT 1";
+        }
+
+        List<T> result = this.query(sql, args, argTypes, rowMapper);
+        if (result == null || result.size() == 0) {
+            throw new RuntimeException("queryForObject resultSet is empty");
+        }
+
+        return result.get(0);
+    }
+
+    /**
+     * 列表查询
+     */
+    public List<Map<String, Object>> queryForList(String sql) {
+        return this.queryForList(sql, null, null, null);
+    }
+
+    /**
+     * 列表查询
+     */
+    public List<Map<String, Object>> queryForList(String sql, Object... args) {
+        return this.queryForList(sql, args, null, null);
+    }
+
+    /**
+     * 列表查询
+     */
+    public <T> List<T> queryForList(String sql, Class<T> requiredType) {
+        return this.queryForList(sql, null, requiredType);
+    }
+
+    /**
+     * 列表查询
+     */
+    public <T> List<T> queryForList(String sql, Object[] args, Class<T> requiredType) {
+        return this.queryForList(sql, args, null, requiredType);
+    }
+
+    /**
+     * 列表查询
+     */
+    public <T> List<T> queryForList(String sql, Class<T> requiredType, Object... args) {
+        return this.queryForList(sql, args, requiredType);
+    }
+
+    /**
+     * 列表查询
+     */
+    public <T> List<T> queryForList(String sql, Object[] args, int[] argTypes, Class<T> requiredType) {
+        return this.query(sql, args, argTypes, new RowMapper<T>() {
+            @Override
+            public T mapRow(ResultSet rs, int rowNum) throws SQLException {
+                // @TODO: 需要优化，类型转换
+                return (T) rs.getObject(1);
+            }
+        });
+    }
+
+    /**
+     * 列表查询
+     */
+    public List<Map<String, Object>> queryForList(String sql, Object[] args, int[] argTypes) {
+        final List<Map<String, Object>> result = new ArrayList<>();
+
+        this.query(sql, args, argTypes, new RowCallbackHandler() {
+            @Override
+            public void processRow(ResultSet rs) throws SQLException {
+                final ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+                while (rs.next()) {
+                    final HashMap<String, Object> map = new HashMap<>();
+
+                    for (int i = 0; i < columnCount; i++) {
+                        map.put(metaData.getColumnName(i), rs.getObject(i));
+                    }
+
+                    result.add(map);
+                }
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * 字典查询 (1条）
+     */
+    public Map<String, Object> queryForMap(String sql, Object[] args, int[] argTypes) {
+        final List<Map<String, Object>> data = this.queryForList(sql, args, argTypes);
+        if (data == null || data.size() == 0) {
+            return Map.of();
+        }
+
+        return data.get(0);
     }
 
     /**
      * 返回一个结果集然后调用 getString 或 getInt 等去取值
      */
-    public void queryForRowSet() {
-
+    public ResultSet queryForRowSet(String sql, Object[] args, int[] argTypes) throws SQLException {
+        return this.query(sql, args, argTypes);
     }
 
 }
