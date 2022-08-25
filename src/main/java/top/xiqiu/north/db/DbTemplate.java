@@ -273,10 +273,19 @@ public class DbTemplate {
     }
 
     /**
-     * 执行SQL语句，无返回值，用于更新操作(增、删、改)
+     * 用于执行任何SQL语句（不确定 SQL 是 DDL/DCL/DML）
+     * 一般用于执行DDL语句，无返回值
      */
-    public void execute() {
-
+    public void execute(String sql) {
+        try {
+            connection = dataSource.getConnection();
+            statement  = connection.createStatement();
+            statement.execute(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.cleanUp();
+        }
     }
 
     /**
@@ -295,7 +304,6 @@ public class DbTemplate {
     }
 
     public <T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) {
-
         return null;
     }
 
