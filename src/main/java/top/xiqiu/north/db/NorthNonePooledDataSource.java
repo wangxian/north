@@ -61,14 +61,11 @@ public class NorthNonePooledDataSource implements DataSource {
         this.defaultTransactionIsolationLevel = defaultTransactionIsolationLevel;
     }
 
-    public NorthNonePooledDataSource(String driver, String url, String username, String password) {
-        this.driver   = driver;
-        this.url      = url;
-        this.username = username;
-        this.password = password;
+    public NorthNonePooledDataSource() {
     }
 
-    public NorthNonePooledDataSource(String url, String username, String password) {
+    public NorthNonePooledDataSource(String driver, String url, String username, String password) {
+        this.driver   = driver;
         this.url      = url;
         this.username = username;
         this.password = password;

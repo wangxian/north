@@ -288,7 +288,7 @@ public class DbTemplate {
      */
     public ResultSet query(String sql, Object[] args, int[] argTypes) throws SQLException {
         getDefaultPreparedStatement(sql, args, argTypes);
-        return preparedStatement.executeQuery(sql);
+        return preparedStatement.executeQuery();
     }
 
     /**
@@ -629,7 +629,7 @@ public class DbTemplate {
                 while (rs.next()) {
                     final HashMap<String, Object> map = new HashMap<>();
 
-                    for (int i = 0; i < columnCount; i++) {
+                    for (int i = 1; i <= columnCount; i++) {
                         map.put(metaData.getColumnName(i), rs.getObject(i));
                     }
 
