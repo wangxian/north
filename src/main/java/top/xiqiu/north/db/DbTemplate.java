@@ -100,8 +100,15 @@ public class DbTemplate {
         int affectedRows = 0;
 
         try {
-            getDefaultPreparedStatement(sql, args, argTypes);
-            affectedRows = preparedStatement.executeUpdate();
+            // 如果没有预处理参数，则直接调用 statement 即可
+            if (args == null || args.length == 0) {
+                connection   = dataSource.getConnection();
+                statement    = connection.createStatement();
+                affectedRows = statement.executeUpdate(sql);
+            } else {
+                getDefaultPreparedStatement(sql, args, argTypes);
+                affectedRows = preparedStatement.executeUpdate();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -286,9 +293,16 @@ public class DbTemplate {
     /**
      * 查询记录集
      */
-    public ResultSet query(String sql, Object[] args, int[] argTypes) throws SQLException {
-        getDefaultPreparedStatement(sql, args, argTypes);
-        return preparedStatement.executeQuery();
+    private ResultSet query(String sql, Object[] args, int[] argTypes) throws SQLException {
+        // 如果没有预处理参数，则直接调用 statement 即可
+        if (args == null || args.length == 0) {
+            connection = dataSource.getConnection();
+            statement  = connection.createStatement();
+            return statement.executeQuery(sql);
+        } else {
+            getDefaultPreparedStatement(sql, args, argTypes);
+            return preparedStatement.executeQuery();
+        }
     }
 
     /**
