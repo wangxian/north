@@ -95,6 +95,7 @@ public class DbTemplate {
 
     /**
      * 更新、删除操作，返回受影响的行数
+     * db::base
      */
     public int update(String sql, Object[] args, int[] argTypes) {
         int affectedRows = 0;
@@ -121,6 +122,7 @@ public class DbTemplate {
 
     /**
      * 更新、删除操作，返回受影响的行数
+     * db::base
      */
     public int update(PreparedStatementCreator preparedStatementCreator) {
         int affectedRows = 0;
@@ -141,8 +143,9 @@ public class DbTemplate {
 
     /**
      * 更新、删除操作，返回受影响的行数，可获取插入的主键ID
+     * db::base
      * <p>
-     * 用法：
+     * **用法：**
      * keyHolder = new GeneratedKeyHolder();
      * this.update(preparedStatementCreator, keyHolder)
      * int id = keyHolder.getKey().intValue()
@@ -175,6 +178,7 @@ public class DbTemplate {
 
     /**
      * 更新、删除操作，返回受影响的行数
+     * db::base
      */
     public int update(String sql, PreparedStatementSetter setter) {
         int affectedRows = 0;
@@ -197,6 +201,7 @@ public class DbTemplate {
     /**
      * 执行批量更新，参数为 String[] 数组
      * 性能好
+     * db:base
      */
     public int[] batchUpdate(final String[] sql) {
         int[] affectedRowsArray = null;
@@ -222,6 +227,7 @@ public class DbTemplate {
 
     /**
      * 执行批量更新 - 批量更新 - 预处理SQL - 回调的方式
+     * db:base
      */
     public int[] batchUpdate(final String sql, final BatchPreparedStatementSetter batchPreparedStatementSetter) {
         int[] affectedRowsArray = null;
@@ -277,6 +283,7 @@ public class DbTemplate {
     /**
      * 用于执行任何SQL语句（不确定 SQL 是 DDL/DCL/DML）
      * 一般用于执行DDL语句，无返回值
+     * db::base
      */
     public void execute(String sql) {
         try {
@@ -291,7 +298,8 @@ public class DbTemplate {
     }
 
     /**
-     * 查询记录集 (base)
+     * 查询记录集
+     * db:base
      */
     private ResultSet query(String sql, Object[] args, int[] argTypes) throws SQLException {
         // 如果没有预处理参数，则直接调用 statement 即可
@@ -391,6 +399,7 @@ public class DbTemplate {
 
     /**
      * 查询记录集 - RowMapper
+     * db:base
      */
     public <T> List<T> query(PreparedStatementCreator preparedStatementCreator, RowMapper<T> rowMapper) {
         ArrayList<T> arrayList = new ArrayList<>();
@@ -439,6 +448,7 @@ public class DbTemplate {
 
     /**
      * 查询记录集 - RowCallbackHandler
+     * db:base
      */
     public void query(PreparedStatementCreator preparedStatementCreator, RowCallbackHandler rowCallbackHandler) {
         try {
@@ -458,6 +468,7 @@ public class DbTemplate {
 
     /**
      * 查询记录集 - ResultSetExtractor
+     * db:base
      */
     public <T> T query(PreparedStatementCreator preparedStatementCreator, ResultSetExtractor<T> resultSetExtractor) {
         T result = null;
