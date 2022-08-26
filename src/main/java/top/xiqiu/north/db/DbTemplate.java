@@ -291,7 +291,7 @@ public class DbTemplate {
     }
 
     /**
-     * 查询记录集
+     * 查询记录集 (base)
      */
     private ResultSet query(String sql, Object[] args, int[] argTypes) throws SQLException {
         // 如果没有预处理参数，则直接调用 statement 即可
@@ -654,6 +654,13 @@ public class DbTemplate {
                 return (T) rs.getObject(1);
             }
         });
+    }
+
+    /**
+     * 字典查询 (1条）
+     */
+    public Map<String, Object> queryForMap(String sql, Object[] args) {
+        return this.queryForMap(sql, args, null);
     }
 
     /**

@@ -11,8 +11,10 @@ public class ArgsTypePreparedStatementSetter implements PreparedStatementSetter 
     private int[] argTypes;
 
     public ArgsTypePreparedStatementSetter(Object[] args, int[] argTypes) {
-        if (args != null && argTypes != null && args.length > argTypes.length) {
-            throw new RuntimeException("ArgsTypePreparedStatementSetter args and argTypes parameters must match");
+        if (args != null && argTypes != null
+                && args.length > 0 & argTypes.length > 0
+                && args.length > argTypes.length) {
+            throw new RuntimeException("ArgsTypePreparedStatementSetter: args and argTypes parameters must match");
         }
 
         this.args     = args;
