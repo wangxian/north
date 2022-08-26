@@ -571,14 +571,41 @@ public class DbTemplate {
      * 列表查询
      */
     public List<Map<String, Object>> queryForList(String sql) {
-        return this.queryForList(sql, null, null, null);
+        return this.queryForList(sql, null, new int[]{});
     }
 
     /**
      * 列表查询
      */
     public List<Map<String, Object>> queryForList(String sql, Object... args) {
-        return this.queryForList(sql, args, null, null);
+        return this.queryForList(sql, args, new int[]{});
+    }
+
+    /**
+     * 列表查询
+     */
+    public List<Map<String, Object>> queryForList(String sql, Object[] args, int[] argTypes) {
+        return this.query(sql, args, argTypes, new ResultSetExtractor<List<Map<String, Object>>>() {
+            @Override
+            public List<Map<String, Object>> extractData(ResultSet rs) throws SQLException {
+                final List<Map<String, Object>> result = new ArrayList<>();
+
+                final ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+
+                while (rs.next()) {
+                    final HashMap<String, Object> map = new HashMap<>();
+
+                    for (int i = 1; i <= columnCount; i++) {
+                        map.put(metaData.getColumnName(i), rs.getObject(i));
+                    }
+
+                    result.add(map);
+                }
+
+                return result;
+            }
+        });
     }
 
     /**
@@ -616,32 +643,6 @@ public class DbTemplate {
     }
 
     /**
-     * 列表查询
-     */
-    public List<Map<String, Object>> queryForList(String sql, Object[] args, int[] argTypes) {
-        final List<Map<String, Object>> result = new ArrayList<>();
-
-        this.query(sql, args, argTypes, new RowCallbackHandler() {
-            @Override
-            public void processRow(ResultSet rs) throws SQLException {
-                final ResultSetMetaData metaData = rs.getMetaData();
-                int columnCount = metaData.getColumnCount();
-                while (rs.next()) {
-                    final HashMap<String, Object> map = new HashMap<>();
-
-                    for (int i = 1; i <= columnCount; i++) {
-                        map.put(metaData.getColumnName(i), rs.getObject(i));
-                    }
-
-                    result.add(map);
-                }
-            }
-        });
-
-        return result;
-    }
-
-    /**
      * 字典查询 (1条）
      */
     public Map<String, Object> queryForMap(String sql, Object[] args, int[] argTypes) {
@@ -654,7 +655,7 @@ public class DbTemplate {
     }
 
     /**
-     * 返回一个结果集然后调用 getString 或 getInt 等去取值
+     * 返回一个结果集之后调用 getString 或 getInt 等去取值
      */
     public ResultSet queryForRowSet(String sql, Object[] args, int[] argTypes) throws SQLException {
         return this.query(sql, args, argTypes);
