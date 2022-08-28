@@ -6,6 +6,7 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -57,6 +58,11 @@ public class ResultRowToBean {
             final Field[] fields = requiredType.getDeclaredFields();
             for (Field field : fields) {
                 String underlineName = toUnderlineCase(field.getName());
+
+                // 被 transient 修饰，跳过赋值
+                if (Modifier.isTransient(field.getModifiers())) {
+                    continue;
+                }
 
                 // 数据库字段的值
                 Object value = null;

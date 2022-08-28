@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 @TableName("person")
 public class Person {
     private Long id;
-    private String name;
-    private int age;
+    private transient String name;
+    private transient int age;
 
     public Person() {
     }
