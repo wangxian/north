@@ -2,10 +2,7 @@ package top.xiqiu.north.db;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 数据库简单操作类
@@ -286,6 +283,7 @@ public class DbTemplate {
      * db::base
      */
     public void execute(String sql) {
+        System.out.printf("数据库操作，执行SQL = %s\n", sql);
         try {
             connection = dataSource.getConnection();
             statement  = connection.createStatement();
@@ -302,6 +300,7 @@ public class DbTemplate {
      * db:base
      */
     private ResultSet query(String sql, Object[] args, int[] argTypes) throws SQLException {
+        System.out.printf("数据库操作，执行SQL = %s, 参数 = %s\n", sql, Arrays.toString(args));
         // 如果没有预处理参数，则直接调用 statement 即可
         if (args == null || args.length == 0) {
             connection = dataSource.getConnection();
@@ -424,7 +423,7 @@ public class DbTemplate {
     }
 
     /**
-     * 查询记录集 - RowMapper - args + argTypes
+     * 查询记录集 - List<T> - RowMapper - args + argTypes
      */
     public <T> List<T> query(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) {
         ArrayList<T> arrayList = new ArrayList<>();
@@ -538,8 +537,7 @@ public class DbTemplate {
             public T extractData(ResultSet rs) throws SQLException {
                 T result = null;
                 if (rs.next()) {
-                    // @TODO 需优化，使用类型强制转换，可能转换失败而报错
-                    result = (T) rs.getObject(1);
+                    result = ResultRowToBean.<T>process(rs, requiredType);
                 }
 
                 return result;
@@ -661,8 +659,7 @@ public class DbTemplate {
         return this.query(sql, args, argTypes, new RowMapper<T>() {
             @Override
             public T mapRow(ResultSet rs, int rowNum) throws SQLException {
-                // @TODO: 需要优化，类型转换
-                return (T) rs.getObject(1);
+                return ResultRowToBean.<T>process(rs, requiredType);
             }
         });
     }
