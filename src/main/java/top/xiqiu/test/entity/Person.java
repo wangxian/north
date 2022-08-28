@@ -1,12 +1,12 @@
 package top.xiqiu.test.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+import top.xiqiu.north.annotation.TableName;
 
 @TableName("person")
 public class Person {
     private Long id;
-    private transient String name;
-    private transient int age;
+    private String name;
+    private int age;
 
     public Person() {
     }
