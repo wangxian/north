@@ -21,13 +21,20 @@ public class DbTest {
         String path = this.getClass().getClassLoader().getResource(".").getPath();
 
         final NorthNonePooledDataSource dataSource = new NorthNonePooledDataSource();
-        dataSource.setDriver("org.h2.Driver");
-        dataSource.setUrl("jdbc:h2:file:" + path + "h2-database");
-        dataSource.setUsername("sa");
-        dataSource.setPassword("");
 
-        // 显示日志
-        // ;TRACE_LEVEL_SYSTEM_OUT=3
+        // 测试 h2
+        // dataSource.setDriver("org.h2.Driver");
+        // // 显示日志
+        // // ;TRACE_LEVEL_SYSTEM_OUT=3
+        // dataSource.setUrl("jdbc:h2:file:" + path + "h2-database");
+        // dataSource.setUsername("sa");
+        // dataSource.setPassword("");
+
+        // 测试 mysql
+        dataSource.setDriver("com.mysql.cj.jdbc.Driver");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true");
+        dataSource.setUsername("test");
+        dataSource.setPassword("password");
 
         logger.info("数据源={}", dataSource.getConnection());
 
@@ -90,13 +97,13 @@ public class DbTest {
         //         "select * from person where id=2", Person.class));
         // // System.out.println("查询对象 自动添加 LIMIT - queryForObject = " + p3);
         //
-        // // 测试批量执行
-        // // dbTemplate.queryForObject("select * from person where id=2", Person.class);
-        // // dbTemplate.queryForObject("select * from person where id=2", Person.class);
-        // // dbTemplate.queryForObject("select * from person where id=2", Person.class);
-        // // dbTemplate.queryForObject("select * from person where id=2", Person.class);
-        // // dbTemplate.queryForObject("select * from person where id=2", Person.class);
-        // // dbTemplate.queryForObject("select * from person where id=2", Person.class);
+        // 测试批量执行
+        // dbTemplate.queryForObject("select * from person where id=2", Person.class);
+        // dbTemplate.queryForObject("select * from person where id=2", Person.class);
+        // dbTemplate.queryForObject("select * from person where id=2", Person.class);
+        // dbTemplate.queryForObject("select * from person where id=2", Person.class);
+        // dbTemplate.queryForObject("select * from person where id=2", Person.class);
+        // dbTemplate.queryForObject("select * from person where id=2", Person.class);
         //
         // // dbTemplate.queryForObject("select * from person where id > ? order by id", Person.class, 1);
         //

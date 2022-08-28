@@ -1,5 +1,7 @@
 package top.xiqiu.north.db;
 
+import org.slf4j.LoggerFactory;
+
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -9,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ResultRowToBean {
+
     /**
      * 驼峰字符串 转 下划线字符串
      * userName To user_name
@@ -37,10 +40,18 @@ public class ResultRowToBean {
         return stringBuilder.toString();
     }
 
-    public static <T> T process(ResultSet rs, Class<T> requiredType) throws SQLException {
+    public static <T> T process(ResultSet rs, Class<T> requiredType) {
         T row = null;
         try {
+            // 实例化T类型
             row = requiredType.getConstructor().newInstance();
+
+            // // 表字段列表
+            // ArrayList<String> columns = new ArrayList<>();
+            // final ResultSetMetaData metaData = rs.getMetaData();
+            // for (int i = 1, columnCount = metaData.getColumnCount(); i <= columnCount; i++) {
+            //     columns.add(metaData.getColumnName(i));
+            // }
 
             // 获取 bean 属性字段
             final Field[] fields = requiredType.getDeclaredFields();
@@ -49,20 +60,31 @@ public class ResultRowToBean {
 
                 // 数据库字段的值
                 Object value = null;
-                if (field.getType() == Integer.class || field.getType() == int.class) {
-                    value = rs.getInt(underlineName);
-                } else if (field.getType() == Double.class || field.getType() == double.class) {
-                    value = rs.getDouble(underlineName);
-                } else if (field.getType() == Long.class || field.getType() == long.class) {
-                    value = rs.getLong(underlineName);
-                } else if (field.getType() == Date.class) {
-                    value = rs.getDate(underlineName);
-                } else if (field.getType() == String.class) {
-                    value = rs.getString(underlineName);
-                } else if (field.getType() == Boolean.class || field.getType() == boolean.class) {
-                    value = rs.getBoolean(underlineName);
-                } else {
-                    value = rs.getObject(underlineName);
+
+                try {
+
+                    if (field.getType() == Integer.class || field.getType() == int.class) {
+                        value = rs.getInt(underlineName);
+                    } else if (field.getType() == Double.class || field.getType() == double.class) {
+                        value = rs.getDouble(underlineName);
+                    } else if (field.getType() == Long.class || field.getType() == long.class) {
+                        value = rs.getLong(underlineName);
+                    } else if (field.getType() == Date.class) {
+                        value = rs.getDate(underlineName);
+                    } else if (field.getType() == String.class) {
+                        value = rs.getString(underlineName);
+                    } else if (field.getType() == Boolean.class || field.getType() == boolean.class) {
+                        value = rs.getBoolean(underlineName);
+                    } else {
+                        value = rs.getObject(underlineName);
+                    }
+                } catch (SQLException e) {
+                    LoggerFactory.getLogger(ResultRowToBean.class)
+                                 .error("ResultRowToBean: mapping db field {} -> {} cause error = {}",
+                                        field.getName(),
+                                        underlineName,
+                                        e.getLocalizedMessage());
+                    continue;
                 }
 
                 // 使用 PropertyDescriptor 设置属性值
