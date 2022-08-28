@@ -61,6 +61,7 @@ public class DbTemplate {
             }
 
             if (connection != null) {
+                // System.out.println("-------- close connection");
                 connection.close();
                 connection = null;
             }
@@ -305,11 +306,13 @@ public class DbTemplate {
         if (args == null || args.length == 0) {
             connection = dataSource.getConnection();
             statement  = connection.createStatement();
-            return statement.executeQuery(sql);
+            resultSet  = statement.executeQuery(sql);
         } else {
             getDefaultPreparedStatement(sql, args, argTypes);
-            return preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
         }
+
+        return resultSet;
     }
 
     /**
@@ -529,9 +532,21 @@ public class DbTemplate {
     }
 
     /**
+     * 对象查询 - Bean
+     */
+    public <T> T queryForObject(String sql, Class<T> requiredType, Object... args) {
+        return queryForObject(sql, args, requiredType);
+    }
+
+    /**
      * 对象查询 - Bean - 有参数
      */
     public <T> T queryForObject(String sql, Object[] args, Class<T> requiredType) {
+        // 提高查询性能，只查询一条即可
+        if (sql != null && !sql.toLowerCase().contains(" limit ")) {
+            sql = sql + " LIMIT 1";
+        }
+
         return this.query(sql, args, new ResultSetExtractor<T>() {
             @Override
             public T extractData(ResultSet rs) throws SQLException {
@@ -555,13 +570,6 @@ public class DbTemplate {
     /**
      * 对象查询 - Bean - 有参数 - RowMapper
      */
-    public <T> T queryForObject(String sql, RowMapper<T> rowMapper, Object[]... args) {
-        return this.queryForObject(sql, args, rowMapper);
-    }
-
-    /**
-     * 对象查询 - Bean - 有参数 - RowMapper
-     */
     public <T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) {
         return this.queryForObject(sql, args, null, rowMapper);
     }
@@ -577,7 +585,7 @@ public class DbTemplate {
      * 对象查询 - Bean - args + argTypes - RowMapper
      */
     public <T> T queryForObject(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) {
-        // 只查询一条
+        // 提高查询性能，只查询一条即可
         if (sql != null && !sql.toLowerCase().contains(" limit ")) {
             sql = sql + " LIMIT 1";
         }
@@ -667,7 +675,7 @@ public class DbTemplate {
     /**
      * 字典查询 (1条）
      */
-    public Map<String, Object> queryForMap(String sql, Object[] args) {
+    public Map<String, Object> queryForMap(String sql, Object... args) {
         return this.queryForMap(sql, args, null);
     }
 
@@ -675,6 +683,11 @@ public class DbTemplate {
      * 字典查询 (1条）
      */
     public Map<String, Object> queryForMap(String sql, Object[] args, int[] argTypes) {
+        // 提高查询性能，只查询一条即可
+        if (sql != null && !sql.toLowerCase().contains(" limit ")) {
+            sql = sql + " LIMIT 1";
+        }
+
         final List<Map<String, Object>> data = this.queryForList(sql, args, argTypes);
         if (data == null || data.size() == 0) {
             return Map.of();
