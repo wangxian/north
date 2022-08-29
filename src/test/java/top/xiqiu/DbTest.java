@@ -3,6 +3,7 @@ package top.xiqiu;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.xiqiu.north.db.DbMapper;
 import top.xiqiu.north.db.DbTemplate;
 import top.xiqiu.north.db.NorthNonePooledDataSource;
 import top.xiqiu.north.db.ResultRowToBean;
@@ -118,4 +119,10 @@ public class DbTest {
         logger.info("UserList = {}", ResultRowToBean.toUnderlineCase("UserList"));
         logger.info("user_info = {}", ResultRowToBean.toUnderlineCase("user_info"));
     }
+
+    @Test
+    public void testDbMapper() {
+        logger.info("DbMapper = {}", DbMapper.of(Person.class));
+    }
+
 }
