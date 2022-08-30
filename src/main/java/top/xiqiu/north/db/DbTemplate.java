@@ -8,7 +8,7 @@ import java.util.*;
  * 数据库简单操作类
  */
 public class DbTemplate {
-    private DataSource dataSource;
+    private final DataSource dataSource;
     private Connection connection;
 
     private Statement statement;
@@ -17,18 +17,19 @@ public class DbTemplate {
     private ResultSet resultSet;
 
     public DbTemplate() {
+        this.dataSource = DataSourceInitializer.initDataSource();
     }
 
-    public DbTemplate(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    /**
-     * 设置数据源
-     */
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+    // public DbTemplate(DataSource dataSource) {
+    //     this.dataSource = dataSource;
+    // }
+    //
+    // /**
+    //  * 设置数据源
+    //  */
+    // public void setDataSource(DataSource dataSource) {
+    //     this.dataSource = dataSource;
+    // }
 
     /**
      * 获取默认 PreparedStatement
@@ -552,7 +553,7 @@ public class DbTemplate {
             public T extractData(ResultSet rs) throws SQLException {
                 T result = null;
                 if (rs.next()) {
-                    result = ResultRowToBean.<T>process(rs, requiredType);
+                    result = ResultRowToBean.process(rs, requiredType);
                 }
 
                 return result;
@@ -667,7 +668,7 @@ public class DbTemplate {
         return this.query(sql, args, argTypes, new RowMapper<T>() {
             @Override
             public T mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return ResultRowToBean.<T>process(rs, requiredType);
+                return ResultRowToBean.process(rs, requiredType);
             }
         });
     }

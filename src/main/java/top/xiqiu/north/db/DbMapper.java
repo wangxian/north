@@ -86,9 +86,6 @@ public class DbMapper {
         // 初始化，数据库操作对象
         instance.dbOrmParam.get().setDbTemplate(new DbTemplate());
 
-        // 设置连接池对象
-        // instance.dbTemplate.get().setDataSource();
-
         return instance;
     }
 

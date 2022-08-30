@@ -45,7 +45,7 @@ public class DbTest {
         DbTemplate dbTemplate = new DbTemplate();
 
         // 设置 DataSource
-        dbTemplate.setDataSource(dataSource);
+        // dbTemplate.setDataSource(dataSource);
 
         // 创建测试表
         // dbTemplate.execute("CREATE TABLE IF NOT EXISTS person (" +
