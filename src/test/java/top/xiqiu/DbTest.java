@@ -3,12 +3,13 @@ package top.xiqiu;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.xiqiu.north.db.DataSourceInitializer;
 import top.xiqiu.north.db.DbMapper;
 import top.xiqiu.north.db.DbTemplate;
-import top.xiqiu.north.db.NorthNonePooledDataSource;
 import top.xiqiu.north.db.ResultRowToBean;
 import top.xiqiu.test.entity.Person;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 public class DbTest {
@@ -21,7 +22,7 @@ public class DbTest {
     public void testDbTemplate() throws SQLException, InterruptedException {
         String path = this.getClass().getClassLoader().getResource(".").getPath();
 
-        final NorthNonePooledDataSource dataSource = new NorthNonePooledDataSource();
+        // final NorthNonePooledDataSource dataSource = new NorthNonePooledDataSource();
 
         // 测试 h2
         // dataSource.setDriver("org.h2.Driver");
@@ -31,11 +32,13 @@ public class DbTest {
         // dataSource.setUsername("sa");
         // dataSource.setPassword("");
 
-        // 测试 mysql
-        dataSource.setDriver("com.mysql.cj.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true");
-        dataSource.setUsername("test");
-        dataSource.setPassword("password");
+        // // 测试 mysql
+        // dataSource.setDriver("com.mysql.cj.jdbc.Driver");
+        // dataSource.setUrl("jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true");
+        // dataSource.setUsername("test");
+        // dataSource.setPassword("password");
+
+        DataSource dataSource = DataSourceInitializer.initDataSource();
 
         logger.info("数据源={}", dataSource.getConnection());
 

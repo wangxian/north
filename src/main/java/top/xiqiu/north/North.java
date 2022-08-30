@@ -256,6 +256,6 @@ public class North {
      * 读取 AppConfig 配置
      */
     public static AppConfig config() {
-        return AppConfig.init();
+        return AppConfig.of();
     }
 }

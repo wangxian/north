@@ -9,10 +9,12 @@ import java.util.List;
  * base on DbTemplate
  */
 public class DbMapper {
+    private static DbMapper instance;
+
     /**
-     * 数据库操作对象
+     * ORM 参数
      */
-    private DbTemplate dbTemplate;
+    private ThreadLocal<DbOrmParam> dbOrmParam = new ThreadLocal<>();
 
     /**
      * 拼接 SQL 所需参数
@@ -20,7 +22,6 @@ public class DbMapper {
     private String tableName;
     private String fields;
     private String where;
-    // private String args;
     private String groupBy;
     private String oderBy;
     private String join;
@@ -33,12 +34,15 @@ public class DbMapper {
      */
     private Class<?> entity;
 
-    // /**
-    //  * SQL 执行达到终点后，清理临时变量
-    //  */
-    // private void cleanUp() {
-    //
-    // }
+    /**
+     * SQL 执行达到终点后，清理临时变量
+     */
+    private void cleanUp() {
+        if (dbOrmParam != null) {
+            dbOrmParam.remove();
+            dbOrmParam = null;
+        }
+    }
 
     /**
      * 创建对象入口
@@ -55,10 +59,12 @@ public class DbMapper {
      * 3. 否则，请使用 table() 方法主动设置表名
      */
     public static DbMapper of(Class<?> clazz) {
-        // 每次都返回一个新对象，内部变量不需要复用
-        DbMapper self = new DbMapper();
+        // 单例 DbMapper，只创建一次
+        if (instance == null) {
+            DbMapper instance = new DbMapper();
+        }
 
-        self.entity = clazz;
+        instance.dbOrmParam.get().setEntity(clazz);
 
         if (clazz != null) {
             String tableName;
@@ -74,20 +80,20 @@ public class DbMapper {
                 tableName = ResultRowToBean.toUnderlineCase(tableName);
             }
 
-            self.tableName = tableName;
+            instance.dbOrmParam.get().setTableName(tableName);
         }
 
         // 初始化，数据库操作对象
-        self.dbTemplate = new DbTemplate();
+        instance.dbOrmParam.get().setDbTemplate(new DbTemplate());
 
         // 设置连接池对象
-        // self.dbTemplate.setDataSource();
+        // instance.dbTemplate.get().setDataSource();
 
-        return self;
+        return instance;
     }
 
     public DbMapper table(String tableName) {
-        this.tableName = tableName;
+        this.dbOrmParam.get().setTableName(tableName);
         return this;
     }
 
