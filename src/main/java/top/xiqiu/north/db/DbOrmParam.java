@@ -3,18 +3,20 @@ package top.xiqiu.north.db;
 /**
  * DbMapper 拼接SQL所需各个参数
  */
-public class DbOrmParam {
+public class DbOrmParam<T> {
     private String tableName;
     private String fields;
     private String where;
     private String groupBy;
-    private String oderBy;
+    private String having;
+    private String orderBy;
     private String join;
 
     private Integer offset = 0;
-    private Integer limit;
+    private Integer limit = 1000;
 
-    private Class<?> entity;
+    private Class<T> entity;
+    private Object[] args;
 
     private DbTemplate dbTemplate;
 
@@ -52,12 +54,12 @@ public class DbOrmParam {
         this.groupBy = groupBy;
     }
 
-    public String getOderBy() {
-        return oderBy;
+    public String getOrderBy() {
+        return orderBy;
     }
 
-    public void setOderBy(String oderBy) {
-        this.oderBy = oderBy;
+    public void setOrderBy(String orderBy) {
+        this.orderBy = orderBy;
     }
 
     public String getJoin() {
@@ -84,11 +86,11 @@ public class DbOrmParam {
         this.limit = limit;
     }
 
-    public Class<?> getEntity() {
+    public Class<T> getEntity() {
         return entity;
     }
 
-    public void setEntity(Class<?> entity) {
+    public void setEntity(Class<T> entity) {
         this.entity = entity;
     }
 
@@ -106,5 +108,21 @@ public class DbOrmParam {
 
     public void setDbTemplate(DbTemplate dbTemplate) {
         this.dbTemplate = dbTemplate;
+    }
+
+    public Object[] getArgs() {
+        return args;
+    }
+
+    public void setArgs(Object[] args) {
+        this.args = args;
+    }
+
+    public String getHaving() {
+        return having;
+    }
+
+    public void setHaving(String having) {
+        this.having = having;
     }
 }
