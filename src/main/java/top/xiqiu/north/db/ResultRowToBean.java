@@ -1,7 +1,5 @@
 package top.xiqiu.north.db;
 
-import org.slf4j.LoggerFactory;
-
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -85,11 +83,11 @@ public class ResultRowToBean {
                         value = rs.getObject(underlineName);
                     }
                 } catch (SQLException e) {
-                    LoggerFactory.getLogger(ResultRowToBean.class)
-                                 .error("ResultRowToBean: mapping db field {} -> {} cause error = {}",
-                                        field.getName(),
-                                        underlineName,
-                                        e.getLocalizedMessage());
+                    // LoggerFactory.getLogger(ResultRowToBean.class)
+                    //              .error("ResultRowToBean: mapping db field {} -> {} cause error = {}",
+                    //                     field.getName(),
+                    //                     underlineName,
+                    //                     e.getLocalizedMessage());
                     continue;
                 }
 

@@ -552,8 +552,17 @@ public class DbTemplate {
             @Override
             public T extractData(ResultSet rs) throws SQLException {
                 T result = null;
+
                 if (rs.next()) {
-                    result = ResultRowToBean.process(rs, requiredType);
+                    // 兼容基本类型的查询需求
+                    if (requiredType == Integer.class) {
+                        result = (T) Integer.valueOf(rs.getInt(1));
+                    } else if (requiredType == Long.class) {
+                        result = (T) Long.valueOf(rs.getLong(1));
+                    } else {
+                        // bean 类型
+                        result = ResultRowToBean.process(rs, requiredType);
+                    }
                 }
 
                 return result;

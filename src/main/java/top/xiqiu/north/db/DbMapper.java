@@ -49,6 +49,7 @@ public class DbMapper {
      * 1. 优先，使用 @TableName 注解
      * 2. 其次，类名首字母小写，转为下划线字符串作为表名, Person - person, UserInfo -> user_info
      * 3. 否则，请使用 table() 方法主动设置表名
+     *
      * @param entity 查询后，映射到 entity，同时也可以根据此推测表名
      */
     public static <T> DbMapper of(Class<T> entity) {
@@ -150,7 +151,7 @@ public class DbMapper {
     /**
      * 准备SQL
      *
-     * @param sqlType 可选：rawSQL | query | queryOne | update ｜ forceUpdate | insert | batchInsert | delete ｜ forceDelete
+     * @param sqlType 可选：rawSQL | query | queryOne | queryPage | update ｜ forceUpdate | insert | batchInsert | delete ｜ forceDelete
      */
     private String prepareSQL(String sqlType) {
         final DbOrmParam dbOrmParam = this.dbOrmParam.get();
@@ -172,8 +173,14 @@ public class DbMapper {
         switch (sqlType) {
             case "query":
             case "queryOne":
+            case "queryPage":
                 fullSQL.append("SELECT ");
-                fullSQL.append(dbOrmParam.getFields() == null ? "*" : dbOrmParam.getFields());
+                if ("queryPage".equals(sqlType)) {
+                    fullSQL.append("count(*) AS count");
+                } else {
+                    fullSQL.append(dbOrmParam.getFields() == null ? "*" : dbOrmParam.getFields());
+                }
+
                 fullSQL.append(" FROM ");
                 fullSQL.append(dbOrmParam.getTableName());
 
@@ -186,10 +193,14 @@ public class DbMapper {
 
                 fullSQL.append(dbOrmParam.getGroupBy() == null ? "" : dbOrmParam.getGroupBy());
                 fullSQL.append(dbOrmParam.getHaving() == null ? "" : dbOrmParam.getHaving());
-                fullSQL.append(dbOrmParam.getOrderBy() == null ? "" : dbOrmParam.getOrderBy());
+
+                // 分页查 count 时，不需要 order by 语句
+                if (!"queryPage".equals(sqlType)) {
+                    fullSQL.append(dbOrmParam.getOrderBy() == null ? "" : dbOrmParam.getOrderBy());
+                }
 
                 // 查询一条 及 查询多条
-                if ("queryOne".equals(sqlType)) {
+                if ("queryOne".equals(sqlType) || "queryPage".equals(sqlType)) {
                     fullSQL.append(" LIMIT 1");
                 } else {
                     fullSQL.append(" LIMIT ").append(dbOrmParam.getLimit());
@@ -290,6 +301,15 @@ public class DbMapper {
     }
 
     /**
+     * 原始 SQL 查询，适合复杂SQL的情况
+     */
+    public DbMapper rawSQL(String sql, Object... args) {
+        dbOrmParam.get().setArgs(args);
+        dbOrmParam.get().setRawSQL(sql);
+        return this;
+    }
+
+    /**
      * 查询一条数据
      */
     public <T> T find() {
@@ -326,19 +346,34 @@ public class DbMapper {
     }
 
     /**
-     * 原始 SQL 查询，适合复杂SQL的情况
-     */
-    public DbMapper rawSQL(String sql, Object... args) {
-        dbOrmParam.get().setArgs(args);
-        dbOrmParam.get().setRawSQL(sql);
-        return this;
-    }
-
-    /**
      * 分页查询数据
      */
-    public void findPage() {
+    public <T> DbPage<T> findPage() {
+        if (dbOrmParam.get().getLimit() == null || dbOrmParam.get().getOrderBy() == null) {
+            throw new RuntimeException("DbMapper cause error, findPage statement need ORDER BY and LIMIT");
+        }
 
+        final DbPage<T> page = new DbPage<>();
+
+        String sqlCount = prepareSQL("queryPage");
+        Object[] args = dbOrmParam.get().getArgs();
+
+        // 查询开始时间
+        long timeBegin = System.currentTimeMillis();
+
+        // 结算总页数
+        Integer count = dbOrmParam.get().getDbTemplate().queryForObject(sqlCount, args, Integer.class);
+        page.setTotal(count.intValue());
+
+        // 查询数据集
+        final String sql = prepareSQL("query");
+        final Class<T> entity = dbOrmParam.get().getEntity();
+        final List<T> result = dbOrmParam.get().getDbTemplate().queryForList(sql, args, entity);
+        page.setRecords(result);
+
+        logger.info("<==  Cost time: {}ms", System.currentTimeMillis() - timeBegin);
+
+        return page;
     }
 
     /**

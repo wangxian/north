@@ -169,12 +169,20 @@ public class DbTest {
         //                                         .field("name")
         //                                         .where("name = ?", "xiqiu").update("xiqiu-33"));
 
-        //
-        logger.info("原始查询 = {}", DbMapper.of(Person.class).rawSQL("select * from person limit 1").findList());
-        logger.info("原始查询 = {}", (Person) DbMapper.of(Person.class).rawSQL("select * from person").find());
-        logger.info("原始删除 = {}", DbMapper.of().rawSQL("delete from person where id=?", 83).execute());
-        logger.info("新增数据 = {}", DbMapper.of().rawSQL("insert into person set name=?", "xi xi-1").execute());
-        logger.info("更新数据 = {}", DbMapper.of().rawSQL("update person set name=? where id=84", "xi xi-1").execute());
+        // 执行原始 SQL
+        // logger.info("原始查询 = {}", DbMapper.of(Person.class).rawSQL("select * from person limit 1").findList());
+        // logger.info("原始查询 = {}", (Person) DbMapper.of(Person.class).rawSQL("select * from person").find());
+        // logger.info("原始删除 = {}", DbMapper.of().rawSQL("delete from person where id=?", 83).execute());
+        // logger.info("新增数据 = {}", DbMapper.of().rawSQL("insert into person set name=?", "xi xi-1").execute());
+        // logger.info("更新数据 = {}", DbMapper.of().rawSQL("update person set name=? where id=84", "xi xi-1").execute());
+
+        // 分页查询
+        DbPage<Person> dbPage = DbMapper.of(Person.class)
+                                        .limit(0, 5)
+                                        .where("id > ?", 1)
+                                        .orderBy("id desc")
+                                        .findPage();
+        logger.info("分页查询 = {}", dbPage);
     }
 
 }
