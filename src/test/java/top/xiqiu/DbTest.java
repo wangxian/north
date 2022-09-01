@@ -3,15 +3,11 @@ package top.xiqiu;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.xiqiu.north.db.DataSourceInitializer;
-import top.xiqiu.north.db.DbMapper;
-import top.xiqiu.north.db.DbTemplate;
-import top.xiqiu.north.db.ResultRowToBean;
+import top.xiqiu.north.db.*;
 import top.xiqiu.test.entity.Person;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.List;
 
 public class DbTest {
     /**
@@ -87,10 +83,10 @@ public class DbTest {
         //         new Object[]{5});
         // logger.info("查询 Map - 有参数 Map = {}", maps4);
 
-        // 查询对象
-        Person p1 = dbTemplate.queryForObject(
-                "select * from person where id = ?", Person.class, 5);
-        logger.info("查询对象 queryForObject = {}", p1);
+        // // 查询对象
+        // Person p1 = dbTemplate.queryForObject(
+        //         "select * from person where id = ?", Person.class, 5);
+        // logger.info("查询对象 queryForObject = {}", p1);
 
         // // 查询对象列表
         // List<Person> p2 = dbTemplate.queryForList(
@@ -114,6 +110,18 @@ public class DbTest {
         //
         // logger.info("queryForMap auto limit = {}",
         //             dbTemplate.queryForMap("select * from person where id > ? order by id", 1));
+
+        // 插入
+        // int count = dbTemplate.update("INSERT INTO person (name, age) VALUES (?, ?)", new Object[]{"xiqiu", 6});
+        // System.out.println(count);
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        String sql = "INSERT INTO person (name, age) VALUES (?, ?)";
+        final SimplePreparedStatementCreator simplePreparedStatementCreator
+                = new SimplePreparedStatementCreator(new ArgsTypePreparedStatementSetter(new Object[]{"xiqiu", 6}, null), sql);
+        dbTemplate.update(simplePreparedStatementCreator, keyHolder);
+        logger.info("插入的数据ID={}", keyHolder.getKey());
+
     }
 
     @Test
@@ -125,24 +133,24 @@ public class DbTest {
     }
 
     @Test
-    public void testDbMapper() {
-        logger.info("DbMapper = {}", DbMapper.of(Person.class));
-    }
-
-    @Test
     public void testMapper() {
-        final DbMapper of = DbMapper.of(Person.class);
 
-        final List<Person> list = DbMapper.of(Person.class)
-                                             .where("id > ?", 0)
-                                             // .leftJoin("user b ON a.id=b.id")
-                                             // .groupBy("id, name")
-                                             .orderBy("id desc")
-                                             .limit(100)
-                                             .findList();
+        // final List<Person> list =
+        //         DbMapper.of(Person.class)
+        //                 .where("id > ?", 0)
+        //                 // .leftJoin("user b ON a.id=b.id")
+        //                 // .groupBy("id, name")
+        //                 .orderBy("id desc")
+        //                 .limit(100)
+        //                 .findList();
+        // System.out.println(list);
 
+        // final Person p1 = DbMapper.of(Person.class)
+        //                           .where("id = ?", 2)
+        //                           .find();
+        // System.out.println("find = " + p1);
 
-        System.out.println(list);
+        logger.info("insert id = {}", DbMapper.of(Person.class).field("name, age").insert("xiqiu", 6));
     }
 
 }

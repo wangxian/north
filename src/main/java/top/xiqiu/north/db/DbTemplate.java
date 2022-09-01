@@ -154,7 +154,7 @@ public class DbTemplate {
 
         try {
             connection        = dataSource.getConnection();
-            preparedStatement = preparedStatementCreator.createPreparedStatement(connection);
+            preparedStatement = preparedStatementCreator.createPreparedStatement(connection, Statement.RETURN_GENERATED_KEYS);
             affectedRows      = preparedStatement.executeUpdate();
 
             resultSet = preparedStatement.getGeneratedKeys();
@@ -163,7 +163,7 @@ public class DbTemplate {
                 id = resultSet.getInt(1);
             }
 
-            // 会写插入的主键ID
+            // 回写新插入的主键ID
             keyHolder.setKey(id);
         } catch (SQLException e) {
             e.printStackTrace();

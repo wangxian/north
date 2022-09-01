@@ -10,4 +10,5 @@ import java.sql.SQLException;
  */
 public interface PreparedStatementCreator {
     PreparedStatement createPreparedStatement(Connection conn) throws SQLException;
+    PreparedStatement createPreparedStatement(Connection conn, int autoGenKeyIndex) throws SQLException;
 }

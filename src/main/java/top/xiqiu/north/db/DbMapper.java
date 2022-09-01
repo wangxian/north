@@ -1,16 +1,23 @@
 package top.xiqiu.north.db;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import top.xiqiu.north.annotation.TableName;
 
+import java.util.Arrays;
 import java.util.List;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * 快速、轻量的 JDBC 操作工具类
  * base on DbTemplate
  */
 public class DbMapper {
+    /**
+     * logger
+     **/
+    private final Logger logger = getLogger(DbMapper.class);
+
     private static DbMapper instance;
 
     /**
@@ -105,8 +112,8 @@ public class DbMapper {
         return this;
     }
 
-    public DbMapper orderBy(String groupBy) {
-        this.dbOrmParam.get().setOrderBy(" ORDER BY " + groupBy);
+    public DbMapper orderBy(String orderBy) {
+        this.dbOrmParam.get().setOrderBy(" ORDER BY " + orderBy);
         return this;
     }
 
@@ -141,7 +148,7 @@ public class DbMapper {
     /**
      * 准备SQL
      *
-     * @param sqlType 可选：query | update | insert | delete
+     * @param sqlType 可选：query | queryOne | update | insert | delete
      */
     private String prepareSQL(String sqlType) {
         final DbOrmParam dbOrmParam = this.dbOrmParam.get();
@@ -161,6 +168,7 @@ public class DbMapper {
 
         switch (sqlType) {
             case "query":
+            case "queryOne":
                 fullSQL.append("SELECT ");
                 fullSQL.append(dbOrmParam.getFields() == null ? "*" : dbOrmParam.getFields());
                 fullSQL.append(" FROM ");
@@ -177,11 +185,40 @@ public class DbMapper {
                 fullSQL.append(dbOrmParam.getHaving() == null ? "" : dbOrmParam.getHaving());
                 fullSQL.append(dbOrmParam.getOrderBy() == null ? "" : dbOrmParam.getOrderBy());
 
-                fullSQL.append(" LIMIT ").append(dbOrmParam.getLimit());
-                fullSQL.append(" OFFSET ").append(dbOrmParam.getOffset());
+                // 查询一条 及 查询多条
+                if ("queryOne".equals(sqlType)) {
+                    fullSQL.append(" LIMIT 1");
+                } else {
+                    fullSQL.append(" LIMIT ").append(dbOrmParam.getLimit());
+                    fullSQL.append(" OFFSET ").append(dbOrmParam.getOffset());
+                }
+
+                break;
+            case "insert":
+                if (dbOrmParam.getFields() == null) {
+                    throw new RuntimeException("DbMapper cause error, insert statement must call/set fields(\"some fields\")");
+                }
+
+                if (dbOrmParam.getArgs() == null) {
+                    throw new RuntimeException("DbMapper cause error, insert statement must set Object... args");
+                }
+
+                fullSQL.append("INSERT INTO ").append(dbOrmParam.getTableName());
+                fullSQL.append(" (").append(dbOrmParam.getFields()).append(") ");
+                fullSQL.append("VALUES (");
+
+                Object[] args = dbOrmParam.getArgs();
+                for (int i = 0; i < args.length; i++) {
+                    fullSQL.append("?, ");
+                }
+                fullSQL.delete(fullSQL.length() - 2, fullSQL.length());
+                fullSQL.append(")");
 
                 break;
         }
+
+        logger.info("execute SQL --- {}", fullSQL);
+        logger.info("execute args --- {}", Arrays.toString(dbOrmParam.getArgs()));
 
         return fullSQL.toString();
     }
@@ -194,18 +231,22 @@ public class DbMapper {
         return this;
     }
 
-    public void find() {
+    public <T> T find() {
+        String sql = prepareSQL("queryOne");
+        Object[] args = dbOrmParam.get().getArgs();
 
+        final Class<T> entity = dbOrmParam.get().getEntity();
+        final T result = dbOrmParam.get().getDbTemplate().queryForObject(sql, args, entity);
+
+        // 执行已到终点，清理变量
+        this.cleanUp();
+
+        return result;
     }
 
     public <T> List<T> findList() {
-        final Logger logger = LoggerFactory.getLogger(DbMapper.class);
-
         String sql = prepareSQL("query");
-        logger.info("execute SQL --- {}", sql);
-
         Object[] args = dbOrmParam.get().getArgs();
-        logger.info("execute args --- {}", args);
 
         final Class<T> entity = dbOrmParam.get().getEntity();
         final List<T> result = dbOrmParam.get().getDbTemplate().queryForList(sql, args, entity);
@@ -220,15 +261,28 @@ public class DbMapper {
 
     }
 
-    public int delete() {
-        return 1;
+    public int insert(Object... args) {
+        dbOrmParam.get().setArgs(args);
+        String sql = prepareSQL("insert");
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        final SimplePreparedStatementCreator simplePreparedStatementCreator
+                = new SimplePreparedStatementCreator(new ArgsTypePreparedStatementSetter(args, null), sql);
+
+        dbOrmParam.get().getDbTemplate().update(simplePreparedStatementCreator, keyHolder);
+
+        // 执行已到终点，清理变量
+        this.cleanUp();
+
+        return keyHolder.getKey();
     }
 
     public int update() {
         return 1;
     }
 
-    public int insert() {
+    public int delete() {
         return 1;
     }
 
