@@ -165,9 +165,16 @@ public class DbTest {
         // logger.info("delete 影响行数 = {}", DbMapper.of(Person.class).delete(true));
 
         // 更新数据
-        logger.info("update 影响行数 = {}", DbMapper.of(Person.class)
-                                                .field("name")
-                                                .where("name = ?", "xiqiu").update("xiqiu-33"));
+        // logger.info("update 影响行数 = {}", DbMapper.of(Person.class)
+        //                                         .field("name")
+        //                                         .where("name = ?", "xiqiu").update("xiqiu-33"));
+
+        //
+        logger.info("原始查询 = {}", DbMapper.of(Person.class).rawSQL("select * from person limit 1").findList());
+        logger.info("原始查询 = {}", (Person) DbMapper.of(Person.class).rawSQL("select * from person").find());
+        logger.info("原始删除 = {}", DbMapper.of().rawSQL("delete from person where id=?", 83).execute());
+        logger.info("新增数据 = {}", DbMapper.of().rawSQL("insert into person set name=?", "xi xi-1").execute());
+        logger.info("更新数据 = {}", DbMapper.of().rawSQL("update person set name=? where id=84", "xi xi-1").execute());
     }
 
 }

@@ -24,7 +24,7 @@ public class DbMapper {
     /**
      * ORM 参数
      */
-    private ThreadLocal<DbOrmParam> dbOrmParam = new ThreadLocal<>();
+    private final ThreadLocal<DbOrmParam> dbOrmParam = new ThreadLocal<>();
 
     /**
      * SQL 执行达到终点后，清理临时变量
@@ -32,7 +32,7 @@ public class DbMapper {
     private void cleanUp() {
         if (dbOrmParam != null) {
             dbOrmParam.remove();
-            dbOrmParam = null;
+            // dbOrmParam = null;
         }
     }
 
@@ -49,6 +49,7 @@ public class DbMapper {
      * 1. 优先，使用 @TableName 注解
      * 2. 其次，类名首字母小写，转为下划线字符串作为表名, Person - person, UserInfo -> user_info
      * 3. 否则，请使用 table() 方法主动设置表名
+     * @param entity 查询后，映射到 entity，同时也可以根据此推测表名
      */
     public static <T> DbMapper of(Class<T> entity) {
         // 单例 DbMapper，只创建一次
@@ -149,13 +150,14 @@ public class DbMapper {
     /**
      * 准备SQL
      *
-     * @param sqlType 可选：query | queryOne | update ｜ forceUpdate | insert | batchInsert | delete ｜ forceDelete
+     * @param sqlType 可选：rawSQL | query | queryOne | update ｜ forceUpdate | insert | batchInsert | delete ｜ forceDelete
      */
     private String prepareSQL(String sqlType) {
         final DbOrmParam dbOrmParam = this.dbOrmParam.get();
 
         // 优先使用 RawSQL 作为查询条件
         if (dbOrmParam.getRawSQL() != null) {
+            logger.info("==>  Preparing: {}", dbOrmParam.getRawSQL());
             return dbOrmParam.getRawSQL();
         }
 
@@ -324,6 +326,15 @@ public class DbMapper {
     }
 
     /**
+     * 原始 SQL 查询，适合复杂SQL的情况
+     */
+    public DbMapper rawSQL(String sql, Object... args) {
+        dbOrmParam.get().setArgs(args);
+        dbOrmParam.get().setRawSQL(sql);
+        return this;
+    }
+
+    /**
      * 分页查询数据
      */
     public void findPage() {
@@ -438,5 +449,19 @@ public class DbMapper {
      */
     public int delete() {
         return delete(false);
+    }
+
+    /**
+     * 执行原始SQL操作
+     * 支持 update / insert / delete
+     */
+    public int execute() {
+        String sql = prepareSQL("rawSQL");
+
+        long timeBegin = System.currentTimeMillis();
+        int result = dbOrmParam.get().getDbTemplate().update(sql, dbOrmParam.get().getArgs());
+        logger.info("<==  Cost time: {}ms", System.currentTimeMillis() - timeBegin);
+
+        return result;
     }
 }
