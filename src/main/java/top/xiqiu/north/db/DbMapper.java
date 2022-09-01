@@ -148,7 +148,7 @@ public class DbMapper {
     /**
      * 准备SQL
      *
-     * @param sqlType 可选：query | queryOne | update | insert | batchInsert | delete
+     * @param sqlType 可选：query | queryOne | update ｜ forceUpdate | insert | batchInsert | delete ｜ forceDelete
      */
     private String prepareSQL(String sqlType) {
         final DbOrmParam dbOrmParam = this.dbOrmParam.get();
@@ -227,6 +227,23 @@ public class DbMapper {
                 fullSQL.append(")");
 
                 break;
+            case "update":
+                break;
+            case "delete":
+            case "forceDelete":
+                if ("delete".equals(sqlType) && dbOrmParam.getWhere() == null) {
+                    throw new RuntimeException("DbMapper cause error, delete statement where condition is miss, consider force update(true) ?");
+                }
+
+                fullSQL.append("DELETE FROM ").append(dbOrmParam.getTableName());
+                if (dbOrmParam.getWhere() != null) {
+                    fullSQL.append(" WHERE ").append(dbOrmParam.getWhere());
+                }
+
+                break;
+            default:
+                throw new RuntimeException("DbMapper cause error, invalid sqlType = " + sqlType);
+                // break;
         }
 
         logger.info("==>  Preparing: {}", fullSQL);
@@ -247,6 +264,9 @@ public class DbMapper {
         return this;
     }
 
+    /**
+     * 查询一条数据
+     */
     public <T> T find() {
         String sql = prepareSQL("queryOne");
         Object[] args = dbOrmParam.get().getArgs();
@@ -262,6 +282,9 @@ public class DbMapper {
         return result;
     }
 
+    /**
+     * 查询多条数据
+     */
     public <T> List<T> findList() {
         String sql = prepareSQL("query");
         Object[] args = dbOrmParam.get().getArgs();
@@ -277,10 +300,16 @@ public class DbMapper {
         return result;
     }
 
+    /**
+     * 分页查询数据
+     */
     public void findPage() {
 
     }
 
+    /**
+     * 插入数据
+     */
     public int insert(Object... args) {
         dbOrmParam.get().setArgs(args);
         String sql = prepareSQL("insert");
@@ -324,11 +353,44 @@ public class DbMapper {
         return result;
     }
 
-    public int update() {
-        return 1;
+    /**
+     * 更新数据
+     */
+    public int update(Object... args) {
+        dbOrmParam.get().setArgs(args);
+        String sql = prepareSQL("update");
+
+        long timeBegin = System.currentTimeMillis();
+        int result = dbOrmParam.get().getDbTemplate().update(sql, args, null);
+        logger.info("<==  Cost time: {}ms", System.currentTimeMillis() - timeBegin);
+
+        // 执行已到终点，清理变量
+        this.cleanUp();
+
+        return result;
     }
 
+    /**
+     * 删除数据
+     * @param isForce 是否强制删除，避免误删数据
+     */
+    public int delete(boolean isForce) {
+        String sql = prepareSQL(isForce ? "forceDelete" : "delete");
+
+        long timeBegin = System.currentTimeMillis();
+        int result = dbOrmParam.get().getDbTemplate().update(sql, dbOrmParam.get().getArgs());
+        logger.info("<==  Cost time: {}ms", System.currentTimeMillis() - timeBegin);
+
+        // 执行已到终点，清理变量
+        this.cleanUp();
+
+        return result;
+    }
+
+    /**
+     * 正常删除
+     */
     public int delete() {
-        return 1;
+        return delete(false);
     }
 }

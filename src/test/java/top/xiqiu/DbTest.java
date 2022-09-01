@@ -4,11 +4,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.db.*;
-import top.xiqiu.test.entity.Person;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class DbTest {
     /**
@@ -154,10 +152,16 @@ public class DbTest {
         // logger.info("insert id = {}", DbMapper.of(Person.class).field("name, age").insert("xiqiu", 6));
 
         // 批量插入
-        ArrayList<Object[]> batchArgs = new ArrayList<>();
-        batchArgs.add(new Object[]{"xiqiu", 5});
-        batchArgs.add(new Object[]{"xiqiu", 5});
-        logger.info("batchInsert 每次影响行数 = {}", DbMapper.of(Person.class).field("name, age").batchInsert(batchArgs));
+        // ArrayList<Object[]> batchArgs = new ArrayList<>();
+        // for (int i = 0; i < 50; i++) {
+        //     batchArgs.add(new Object[]{"xiqiu-" + i, i});
+        // }
+        //
+        // logger.info("batchInsert 每次影响行数 = {}", DbMapper.of(Person.class).field("name, age").batchInsert(batchArgs));
+
+        // 删除数据
+        // logger.info("delete 影响行数 = {}", DbMapper.of(Person.class).where("name = ?", "xiqiu").delete());
+        // logger.info("delete 影响行数 = {}", DbMapper.of(Person.class).delete(true));
     }
 
 }
