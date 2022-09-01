@@ -177,12 +177,20 @@ public class DbTest {
         // logger.info("更新数据 = {}", DbMapper.of().rawSQL("update person set name=? where id=84", "xi xi-1").execute());
 
         // 分页查询
-        DbPage<Person> dbPage = DbMapper.of(Person.class)
-                                        .limit(0, 5)
-                                        .where("id > ?", 1)
-                                        .orderBy("id desc")
-                                        .findPage();
-        logger.info("分页查询 = {}", dbPage);
+        // DbPage<Person> dbPage1 = DbMapper.of(Person.class)
+        //                                 .limit(0, 5)
+        //                                 .where("id > ?", 1)
+        //                                 .orderBy("id desc")
+        //                                 .findPage();
+        // logger.info("分页查询 = {}", dbPage1);
+
+        DbPage<Person>  dbPage2 = DbMapper.of(Person.class)
+                              .limit(new Pagination(2, 10))
+                              .where("id > ?", 1)
+                              .orderBy("id desc")
+                              .findPage();
+        logger.info("分页查询 = {}", dbPage2);
+
     }
 
 }

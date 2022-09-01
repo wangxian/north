@@ -25,6 +25,8 @@ public class DbOrmParam<T> {
 
     private String rawSQL;
 
+    private Pagination pagination;
+
     public String getTableName() {
         return tableName;
     }
@@ -135,5 +137,13 @@ public class DbOrmParam<T> {
 
     public void setBatchArgs(List<Object[]> batchArgs) {
         this.batchArgs = batchArgs;
+    }
+
+    public Pagination getPagination() {
+        return pagination;
+    }
+
+    public void setPagination(Pagination pagination) {
+        this.pagination = pagination;
     }
 }

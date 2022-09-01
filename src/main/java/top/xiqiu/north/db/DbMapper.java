@@ -131,6 +131,19 @@ public class DbMapper {
         return this;
     }
 
+    /**
+     * 分页查询 - 按页查询
+     */
+    public DbMapper limit(Pagination pagination) {
+        final DbOrmParam dbOrmParam = this.dbOrmParam.get();
+
+        dbOrmParam.setPagination(pagination);
+        dbOrmParam.setLimit(pagination.getPageSize());
+        dbOrmParam.setOffset((pagination.getCurrentPage() - 1) * pagination.getPageSize());
+
+        return this;
+    }
+
     public DbMapper leftJoin(String leftJoin) {
         return join(" LEFT JOIN " + leftJoin + " ");
     }
@@ -361,7 +374,7 @@ public class DbMapper {
         // 查询开始时间
         long timeBegin = System.currentTimeMillis();
 
-        // 结算总页数
+        // 结算数据量
         Integer count = dbOrmParam.get().getDbTemplate().queryForObject(sqlCount, args, Integer.class);
         page.setTotal(count.intValue());
 
@@ -370,6 +383,21 @@ public class DbMapper {
         final Class<T> entity = dbOrmParam.get().getEntity();
         final List<T> result = dbOrmParam.get().getDbTemplate().queryForList(sql, args, entity);
         page.setRecords(result);
+
+        // 计算数量量
+        if (dbOrmParam.get().getPagination() != null) {
+            int pageSize = dbOrmParam.get().getPagination().getPageSize();
+            int currentPage = dbOrmParam.get().getPagination().getCurrentPage();
+            int pageCount = (int) (Math.ceil(count.doubleValue() / pageSize));
+
+            if (currentPage > pageCount) {
+                currentPage = pageCount;
+            }
+
+            page.setPageSize(pageSize);
+            page.setPageCount(pageCount);
+            page.setCurrentPage(currentPage);
+        }
 
         logger.info("<==  Cost time: {}ms", System.currentTimeMillis() - timeBegin);
 
