@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.db.*;
+import top.xiqiu.test.entity.Person;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -162,6 +163,11 @@ public class DbTest {
         // 删除数据
         // logger.info("delete 影响行数 = {}", DbMapper.of(Person.class).where("name = ?", "xiqiu").delete());
         // logger.info("delete 影响行数 = {}", DbMapper.of(Person.class).delete(true));
+
+        // 更新数据
+        logger.info("update 影响行数 = {}", DbMapper.of(Person.class)
+                                                .field("name")
+                                                .where("name = ?", "xiqiu").update("xiqiu-33"));
     }
 
 }

@@ -3,6 +3,7 @@ package top.xiqiu.north.db;
 import org.slf4j.Logger;
 import top.xiqiu.north.annotation.TableName;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -228,6 +229,30 @@ public class DbMapper {
 
                 break;
             case "update":
+            case "forceUpdate":
+                if (dbOrmParam.getFields() == null) {
+                    throw new RuntimeException("DbMapper cause error, update statement must call/set fields(\"some fields\")");
+                }
+
+                if ("update".equals(sqlType) && dbOrmParam.getWhere() == null) {
+                    throw new RuntimeException("DbMapper cause error, update statement where condition is miss, consider force update(true, Object... args) ?");
+                }
+
+                fullSQL.append("UPDATE ").append(dbOrmParam.getTableName()).append(" SET ");
+
+                String updateFields;
+                if (dbOrmParam.getFields().contains(",")) {
+                    updateFields = dbOrmParam.getFields().replace(",", " = ?,");
+                } else {
+                    updateFields = dbOrmParam.getFields() + " = ?";
+                }
+
+                fullSQL.append(updateFields);
+
+                if (dbOrmParam.getWhere() != null) {
+                    fullSQL.append(" WHERE ").append(dbOrmParam.getWhere());
+                }
+
                 break;
             case "delete":
             case "forceDelete":
@@ -247,11 +272,9 @@ public class DbMapper {
         }
 
         logger.info("==>  Preparing: {}", fullSQL);
-        if (sqlType != "batchInsert") {
-            logger.info("==> Parameters: {}", Arrays.toString(dbOrmParam.getArgs()));
-        } else {
-            logger.info("==> Parameters: [{}...]", Arrays.toString((Object[]) dbOrmParam.getBatchArgs().get(0)));
-        }
+        logger.info("==> Parameters: {}" + (dbOrmParam.getBatchArgs() != null ? ",..." : ""), dbOrmParam.getBatchArgs() != null
+                ? Arrays.toString((Object[]) dbOrmParam.getBatchArgs().get(0))
+                : Arrays.toString(dbOrmParam.getArgs()));
 
         return fullSQL.toString();
     }
@@ -355,13 +378,28 @@ public class DbMapper {
 
     /**
      * 更新数据
+     *
+     * @param isForce 是否强制更新，避免误操作
      */
-    public int update(Object... args) {
-        dbOrmParam.get().setArgs(args);
-        String sql = prepareSQL("update");
+    public int update(boolean isForce, Object... args) {
+        // 合并 where 的 args 和 行参的 args
+        Object[] argsWhere = dbOrmParam.get().getArgs();
+        if (argsWhere == null) {
+            dbOrmParam.get().setArgs(args);
+        } else {
+            List<Object> argList = new ArrayList<>(Arrays.asList(args));
+            argList.addAll(Arrays.asList(argsWhere));
+
+            // 重新赋值合，并后的新参数列表
+            args = argList.toArray();
+
+            dbOrmParam.get().setArgs(args);
+        }
+
+        String sql = prepareSQL(isForce ? "forceUpdate" : "update");
 
         long timeBegin = System.currentTimeMillis();
-        int result = dbOrmParam.get().getDbTemplate().update(sql, args, null);
+        int result = dbOrmParam.get().getDbTemplate().update(sql, args);
         logger.info("<==  Cost time: {}ms", System.currentTimeMillis() - timeBegin);
 
         // 执行已到终点，清理变量
@@ -371,7 +409,15 @@ public class DbMapper {
     }
 
     /**
+     * 更新数据 - 正常更新（非强制）
+     */
+    public int update(Object... args) {
+        return update(false, args);
+    }
+
+    /**
      * 删除数据
+     *
      * @param isForce 是否强制删除，避免误删数据
      */
     public int delete(boolean isForce) {
@@ -388,7 +434,7 @@ public class DbMapper {
     }
 
     /**
-     * 正常删除
+     * 正常删除（非强制）
      */
     public int delete() {
         return delete(false);
