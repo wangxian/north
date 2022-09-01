@@ -1,5 +1,7 @@
 package top.xiqiu.north.db;
 
+import java.util.List;
+
 /**
  * DbMapper 拼接SQL所需各个参数
  */
@@ -17,6 +19,7 @@ public class DbOrmParam<T> {
 
     private Class<T> entity;
     private Object[] args;
+    private List<Object[]> batchArgs;
 
     private DbTemplate dbTemplate;
 
@@ -124,5 +127,13 @@ public class DbOrmParam<T> {
 
     public void setHaving(String having) {
         this.having = having;
+    }
+
+    public List<Object[]> getBatchArgs() {
+        return batchArgs;
+    }
+
+    public void setBatchArgs(List<Object[]> batchArgs) {
+        this.batchArgs = batchArgs;
     }
 }

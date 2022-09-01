@@ -148,7 +148,7 @@ public class DbMapper {
     /**
      * 准备SQL
      *
-     * @param sqlType 可选：query | queryOne | update | insert | delete
+     * @param sqlType 可选：query | queryOne | update | insert | batchInsert | delete
      */
     private String prepareSQL(String sqlType) {
         final DbOrmParam dbOrmParam = this.dbOrmParam.get();
@@ -195,19 +195,31 @@ public class DbMapper {
 
                 break;
             case "insert":
+            case "batchInsert":
                 if (dbOrmParam.getFields() == null) {
                     throw new RuntimeException("DbMapper cause error, insert statement must call/set fields(\"some fields\")");
-                }
-
-                if (dbOrmParam.getArgs() == null) {
-                    throw new RuntimeException("DbMapper cause error, insert statement must set Object... args");
                 }
 
                 fullSQL.append("INSERT INTO ").append(dbOrmParam.getTableName());
                 fullSQL.append(" (").append(dbOrmParam.getFields()).append(") ");
                 fullSQL.append("VALUES (");
 
-                Object[] args = dbOrmParam.getArgs();
+                Object[] args = new Object[]{};
+
+                if ("insert".equals(sqlType)) {
+                    args = dbOrmParam.getArgs();
+
+                    if (dbOrmParam.getArgs() == null) {
+                        throw new RuntimeException("DbMapper cause error, insert statement must be set to Object... args");
+                    }
+                } else {
+                    if (dbOrmParam.getBatchArgs() == null || dbOrmParam.getBatchArgs().size() == 0) {
+                        throw new RuntimeException("DbMapper cause error, batchInsert batchArgs is empty");
+                    }
+
+                    args = (Object[]) dbOrmParam.getBatchArgs().get(0);
+                }
+
                 for (int i = 0; i < args.length; i++) {
                     fullSQL.append("?, ");
                 }
@@ -217,8 +229,12 @@ public class DbMapper {
                 break;
         }
 
-        logger.info("execute SQL --- {}", fullSQL);
-        logger.info("execute args --- {}", Arrays.toString(dbOrmParam.getArgs()));
+        logger.info("==>  Preparing: {}", fullSQL);
+        if (sqlType != "batchInsert") {
+            logger.info("==> Parameters: {}", Arrays.toString(dbOrmParam.getArgs()));
+        } else {
+            logger.info("==> Parameters: [{}...]", Arrays.toString((Object[]) dbOrmParam.getBatchArgs().get(0)));
+        }
 
         return fullSQL.toString();
     }
@@ -236,7 +252,9 @@ public class DbMapper {
         Object[] args = dbOrmParam.get().getArgs();
 
         final Class<T> entity = dbOrmParam.get().getEntity();
+        long timeBegin = System.currentTimeMillis();
         final T result = dbOrmParam.get().getDbTemplate().queryForObject(sql, args, entity);
+        logger.info("<==  Cost time: {}ms", System.currentTimeMillis() - timeBegin);
 
         // 执行已到终点，清理变量
         this.cleanUp();
@@ -249,7 +267,9 @@ public class DbMapper {
         Object[] args = dbOrmParam.get().getArgs();
 
         final Class<T> entity = dbOrmParam.get().getEntity();
+        long timeBegin = System.currentTimeMillis();
         final List<T> result = dbOrmParam.get().getDbTemplate().queryForList(sql, args, entity);
+        logger.info("<==  Cost time: {}ms", System.currentTimeMillis() - timeBegin);
 
         // 执行已到终点，清理变量
         this.cleanUp();
@@ -270,12 +290,38 @@ public class DbMapper {
         final SimplePreparedStatementCreator simplePreparedStatementCreator
                 = new SimplePreparedStatementCreator(new ArgsTypePreparedStatementSetter(args, null), sql);
 
+        long timeBegin = System.currentTimeMillis();
         dbOrmParam.get().getDbTemplate().update(simplePreparedStatementCreator, keyHolder);
+        logger.info("<==  Cost time: {}ms", System.currentTimeMillis() - timeBegin);
 
         // 执行已到终点，清理变量
         this.cleanUp();
 
         return keyHolder.getKey();
+    }
+
+    /**
+     * 批量插入
+     */
+    public int[] batchInsert(List<Object[]> batchArgs) {
+        return batchInsert(batchArgs, null);
+    }
+
+    /**
+     * 批量插入
+     */
+    public int[] batchInsert(List<Object[]> batchArgs, int[] argTypes) {
+        dbOrmParam.get().setBatchArgs(batchArgs);
+        String sql = prepareSQL("batchInsert");
+
+        long timeBegin = System.currentTimeMillis();
+        int[] result = dbOrmParam.get().getDbTemplate().batchUpdate(sql, batchArgs, argTypes);
+        logger.info("<==  Cost time: {}ms", System.currentTimeMillis() - timeBegin);
+
+        // 执行已到终点，清理变量
+        this.cleanUp();
+
+        return result;
     }
 
     public int update() {
@@ -284,19 +330,5 @@ public class DbMapper {
 
     public int delete() {
         return 1;
-    }
-
-    /**
-     * 批量插入
-     */
-    public int[] batchInsert(List<Object[]> args) {
-        return batchInsert(args, null);
-    }
-
-    /**
-     * 批量插入
-     */
-    public int[] batchInsert(List<Object[]> args, int[] argTypes) {
-        return null;
     }
 }

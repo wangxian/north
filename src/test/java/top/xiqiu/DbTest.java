@@ -8,6 +8,7 @@ import top.xiqiu.test.entity.Person;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class DbTest {
     /**
@@ -150,7 +151,13 @@ public class DbTest {
         //                           .find();
         // System.out.println("find = " + p1);
 
-        logger.info("insert id = {}", DbMapper.of(Person.class).field("name, age").insert("xiqiu", 6));
+        // logger.info("insert id = {}", DbMapper.of(Person.class).field("name, age").insert("xiqiu", 6));
+
+        // 批量插入
+        ArrayList<Object[]> batchArgs = new ArrayList<>();
+        batchArgs.add(new Object[]{"xiqiu", 5});
+        batchArgs.add(new Object[]{"xiqiu", 5});
+        logger.info("batchInsert 每次影响行数 = {}", DbMapper.of(Person.class).field("name, age").batchInsert(batchArgs));
     }
 
 }

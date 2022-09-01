@@ -254,20 +254,20 @@ public class DbTemplate {
     /**
      * 批量更新 - 批量更新（指定参数类型）- 预处理SQL
      *
-     * @param args 参数列表，注意：Object[] 为一次SQL需要的参数，故外层还有一个 List<> 结构
+     * @param batchArgs 参数列表，注意：Object[] 为一次SQL需要的参数，故外层还有一个 List<> 结构
      */
-    public int[] batchUpdate(final String sql, List<Object[]> args, int[] argTypes) {
+    public int[] batchUpdate(final String sql, List<Object[]> batchArgs, int[] argTypes) {
         return this.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement preparedStatement, int index) throws SQLException {
-                Object[] argsItem = args.get(index);
-                ArgsTypePreparedStatementSetter setter = new ArgsTypePreparedStatementSetter(argsItem, argTypes);
+                Object[] args = batchArgs.get(index);
+                ArgsTypePreparedStatementSetter setter = new ArgsTypePreparedStatementSetter(args, argTypes);
                 setter.setValues(preparedStatement);
             }
 
             @Override
             public int size() {
-                return args.size();
+                return batchArgs.size();
             }
         });
     }
