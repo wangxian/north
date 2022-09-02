@@ -91,12 +91,12 @@ public class RouteHandler {
                         if (method.getAnnotation(GetMapping.class) != null) {
                             String path = controllerContextPath + method.getAnnotation(GetMapping.class).value();
 
-                            logger.info("[north] [route] GET {} -> {}", path, method);
+                            logger.info("[north] [route]     GET {} -> {}", path, getReadableMethodName(method));
                             getMappings.put(path, new GetDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
                         } else {
                             String path = controllerContextPath + method.getAnnotation(DeleteMapping.class).value();
 
-                            logger.info("[north] [route] DELETE {} -> {}", path, method);
+                            logger.info("[north] [route]  DELETE {} -> {}", path, getReadableMethodName(method));
                             deleteMappings.put(path, new DeleteDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
                         }
                     } else if (method.getAnnotation(PostMapping.class) != null
@@ -126,17 +126,17 @@ public class RouteHandler {
                         if (method.getAnnotation(PostMapping.class) != null) {
                             String path = controllerContextPath + method.getAnnotation(PostMapping.class).value();
 
-                            logger.info("[north] [route] POST {} -> {}", path, method.getName());
+                            logger.info("[north] [route]    POST {} -> {}", path, getReadableMethodName(method));
                             postMappings.put(path, new PostDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes(), new JsonConverter()));
                         } else if (method.getAnnotation(RequestMapping.class) != null) {
                             String path = controllerContextPath + method.getAnnotation(RequestMapping.class).value();
 
-                            logger.info("[north] [route] REQUEST {} -> {}", path, method.getName());
+                            logger.info("[north] [route] REQUEST {} -> {}", path, getReadableMethodName(method));
                             requestMappings.put(path, new RequestDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes(), new JsonConverter()));
                         } else {
                             String path = controllerContextPath + method.getAnnotation(PutMapping.class).value();
 
-                            logger.info("[north] [route] PUT {} -> {}", path, method.getName());
+                            logger.info("[north] [route]     PUT {} -> {}", path, getReadableMethodName(method));
                             putMappings.put(path, new PutDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes(), new JsonConverter()));
                         }
                     }
@@ -145,6 +145,17 @@ public class RouteHandler {
                 throw new NorthException(e);
             }
         }
+    }
+
+    private static String getReadableMethodName(Method method) {
+        String str = method.toString();
+        str = str.substring(0, str.lastIndexOf("("));
+
+        String methodName = str.substring(str.lastIndexOf(".") + 1);
+        str = str.substring(0, str.lastIndexOf("."));
+        String controllerName = str.substring(str.lastIndexOf(".") + 1);
+
+        return controllerName + "#" + methodName;
     }
 
     /**

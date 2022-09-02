@@ -183,7 +183,7 @@ public class North {
         context.addLifecycleListener(new LifecycleListener() {
             @Override
             public void lifecycleEvent(LifecycleEvent event) {
-                logger.info("收到 LifecycleListener 事件 = {}", event.getType());
+                // logger.info("收到 LifecycleListener 事件 = {}", event.getType());
                 switch (event.getType()) {
                     case Lifecycle.START_EVENT:
                         onStart(event);
