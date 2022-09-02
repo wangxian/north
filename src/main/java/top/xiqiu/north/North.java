@@ -74,6 +74,9 @@ public class North {
         // 做一些 Server 启动前的准备
         _prepareServer();
 
+        // 设置 404 / 500 错误页面
+        _errorPage();
+
         // 是否支持 jsp，不使用 jsp 作为模版引擎的时候，可以不设置支持 jsp
         if ("jsp".equals(North.config().get("north.view-engine", "pebble"))) {
             _supportJsp();
@@ -178,20 +181,41 @@ public class North {
                 switch (event.getType()) {
                     case Lifecycle.START_EVENT:
                         onStart(event);
+                        break;
                     case Lifecycle.AFTER_START_EVENT:
                         onAfterStart(event);
+                        break;
                     case Lifecycle.BEFORE_START_EVENT:
                         onBeforeStart(event);
                         break;
                 }
             }
         });
+    }
 
-        // ErrorPage
-        ErrorPage page404 = new ErrorPage();
-        page404.setErrorCode(404);
-        page404.setLocation("/404");
-        context.addErrorPage(page404);
+    /**
+     * Setting ErrorPage, 404, 500
+     */
+    private static void _errorPage() {
+        String errorPage404 = config().get("north.error-page-404", "");
+        if (!"".equals(errorPage404)) {
+            ErrorPage page404 = new ErrorPage();
+            page404.setErrorCode(404);
+            page404.setLocation(errorPage404);
+
+            context.addErrorPage(page404);
+            logger.info("[north] setting error page 404 = {}", errorPage404);
+        }
+
+        String errorPage500 = config().get("north.error-page-500", "");
+        if (!"".equals(errorPage500)) {
+            ErrorPage page500 = new ErrorPage();
+            page500.setErrorCode(500);
+            page500.setLocation(errorPage500);
+
+            context.addErrorPage(page500);
+            logger.info("[north] setting error page 404 = {}", errorPage500);
+        }
     }
 
     /**
@@ -260,9 +284,8 @@ public class North {
 
     /**
      * Web app ClassPath
-     * <p>
-     * 说明：
-     * - 路径为 .../target/classes/ 或 .../target/xxx.jar
+     * **说明：**
+     * - 路径为 ./xxx/target/classes/ 或 ../xxx/target/xxx.jar
      * - 非 fatjar 运行和 getWorkingDirectory() 结果一样，fatjar运行括后缀 xxx.jar
      */
     public static String getClassPath() {

@@ -4,13 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
-
 /**
  * json 转换类，方便更换类库
  */
 public class JsonConverter {
-    private Gson gson;
+    private final Gson gson;
 
     public JsonConverter() {
         gson = new GsonBuilder()
@@ -46,8 +44,8 @@ public class JsonConverter {
      * 字符串解析为 Map/List（泛型解析，注意类型擦除）
      */
     public <T> T parse(String jsonStr) {
-        Type type = new TypeToken<T>() {
-        }.getType();
+        // Type type = new TypeToken<T>() {}.getType();
+
         return gson.fromJson(jsonStr, new TypeToken<T>() {
         }.getType());
     }
