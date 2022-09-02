@@ -81,10 +81,10 @@ public class North {
         // 处理 @Controller 注解
         ScanClassWithAnnotations.scanAndStoreControllers(classes);
 
-        // 预处理 xxxMapping 注解
+        // 预处理控制器 xxxMapping 注解
         RouteHandler.processMappings();
 
-        // 做一些启动前的准备
+        // 做一些 Server 启动前的准备
         _prepareServer();
 
         // 是否支持 jsp，不使用 jsp 作为模版引擎的时候，可以不设置支持 jsp
@@ -230,21 +230,21 @@ public class North {
     }
 
     /**
-     * WebTester ClassPath
+     * Web app ClassPath
      * <p>
      * 说明：
      * - 路径为 .../target/classes/ 或 .../target/xxx.jar
-     * - 非 fatjar 运行和 getClassPath() 结果一样，fatjar运行不包括尾部的 xxx.jar
+     * - 非 fatjar 运行和 getWorkingDirectory() 结果一样，fatjar运行括后缀 xxx.jar
      */
     public static String getClassPath() {
         return APP_CLASS_PATH;
     }
 
     /**
-     * WebTester 运行目录(注意：路径以 / 结尾)
-     * 说明：返回应用程序运行的目录
+     * 运行目录(注意：路径以 / 结尾)
+     * 说明：返回应用程序工作的目录
      */
-    public static String getBasePath() {
+    public static String getWorkingDirectory() {
         if (isAppRunInJar) {
             return APP_CLASS_PATH.substring(0, APP_CLASS_PATH.lastIndexOf("/"));
         }
