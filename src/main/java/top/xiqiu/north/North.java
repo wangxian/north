@@ -1,9 +1,6 @@
 package top.xiqiu.north;
 
-import org.apache.catalina.Context;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.WebResourceRoot;
-import org.apache.catalina.Wrapper;
+import org.apache.catalina.*;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.JarResourceSet;
@@ -73,16 +70,6 @@ public class North {
         if (isAppRunInJar) {
             logger.info("[north] north.version = {}", config().getNorthVersion());
         }
-
-        // 扫描需要预处理的类并处理相关注解
-        final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
-        logger.info("[north] 扫描到的类 = {}", classes);
-
-        // 处理 @Controller 注解
-        ScanClassWithAnnotations.scanAndStoreControllers(classes);
-
-        // 预处理控制器 xxxMapping 注解
-        RouteHandler.processMappings();
 
         // 做一些 Server 启动前的准备
         _prepareServer();
@@ -183,6 +170,23 @@ public class North {
         context.addServletMappingDecoded("/static/*", "static-files");
         context.addServletMappingDecoded("/favicon.ico", "static-files");
 
+        // 监听 Server 启动事件
+        context.addLifecycleListener(new LifecycleListener() {
+            @Override
+            public void lifecycleEvent(LifecycleEvent event) {
+                logger.info("收到 LifecycleListener 事件 = {}", event.getType());
+                switch (event.getType()) {
+                    case Lifecycle.START_EVENT:
+                        onStart(event);
+                    case Lifecycle.AFTER_START_EVENT:
+                        onAfterStart(event);
+                    case Lifecycle.BEFORE_START_EVENT:
+                        onBeforeStart(event);
+                        break;
+                }
+            }
+        });
+
         // ErrorPage
         ErrorPage page404 = new ErrorPage();
         page404.setErrorCode(404);
@@ -212,21 +216,46 @@ public class North {
      * 启动 web server
      */
     private static void _startServer() {
-        // Start Tomcat embedded server
         try {
             tomcat.start();
-
-            // Leave startup message
-            logger.info("[north] startup.time.cost={}ms | startup success at http://{}:{}/",
-                        System.currentTimeMillis() - _startTime,
-                        config().get("server.host", "0.0.0.0"),
-                        config().getInt("server.port", 8080));
-
             tomcat.getServer().await();
         } catch (LifecycleException e) {
             logger.error("启动 Tomcat server 失败={}", e.getLocalizedMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 启动之前触发
+     */
+    private static void onBeforeStart(LifecycleEvent event) {
+
+    }
+
+    /**
+     * 启动时触发
+     */
+    private static void onStart(LifecycleEvent event) {
+        // Leave startup message
+        logger.info("[north] startup.time.cost={}ms | startup success at http://{}:{}/",
+                    System.currentTimeMillis() - _startTime,
+                    config().get("server.host", "0.0.0.0"),
+                    config().getInt("server.port", 8080));
+    }
+
+    /**
+     * 启动之后触发
+     */
+    private static void onAfterStart(LifecycleEvent event) {
+        // 扫描需要预处理的类并处理相关注解
+        final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(North.class.getPackageName());
+        logger.info("[north] 扫描到的类 = {}", classes);
+
+        // 处理 @Controller 注解
+        ScanClassWithAnnotations.scanAndStoreControllers(classes);
+
+        // 预处理控制器 xxxMapping 注解
+        RouteHandler.processMappings();
     }
 
     /**
