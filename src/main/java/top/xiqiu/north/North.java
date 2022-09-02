@@ -50,12 +50,18 @@ public class North {
     private static long _startTime = 0;
 
     /**
+     * 主入口类
+     */
+    private static Class<?> mainAppClass;
+
+    /**
      * 启动 Webapp
      *
      * @param mainAppClass 主入口class
      */
     public static void start(Class<?> mainAppClass) {
         _startTime = System.currentTimeMillis();
+        North.mainAppClass = mainAppClass;
 
         // 基本目录，fatjar 路径是 xxx/target/xxx.jar
         APP_CLASS_PATH = mainAppClass.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -272,7 +278,7 @@ public class North {
      */
     private static void onAfterStart(LifecycleEvent event) {
         // 扫描需要预处理的类并处理相关注解
-        final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(North.class.getPackageName());
+        final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
         logger.info("[north] 扫描到的类 = {}", classes);
 
         // 处理 @Controller 注解
