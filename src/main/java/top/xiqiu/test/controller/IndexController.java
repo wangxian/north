@@ -5,6 +5,7 @@ import top.xiqiu.north.core.ModelAndView;
 import top.xiqiu.test.entity.Login;
 import top.xiqiu.test.entity.User;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
@@ -37,6 +38,12 @@ public class IndexController {
 
     @GetMapping("/hello")
     public ModelAndView hello(String name) {
+        int b = 0;
+        int a= 15;
+        if (true) {
+            final int i = a / b;
+        }
+
         if (name == null) {
             name = "World";
         }
@@ -78,6 +85,20 @@ public class IndexController {
 
         PrintWriter printWriter = response.getWriter();
         printWriter.write("404 NOT FOUND");
+        printWriter.flush();
+    }
+
+    /**
+     * 404 global page
+     */
+    @GetMapping("/500")
+    public void page500(HttpServletRequest req, HttpServletResponse response) throws IOException {
+        response.setContentType("text/plain;charset=utf-8");
+
+        PrintWriter printWriter = response.getWriter();
+        printWriter.write("500 ERROR\n");
+        printWriter.write( "原因：" + req.getAttribute("errorMessage").toString());
+        printWriter.write(req.getAttribute("errorStackTrace").toString());
         printWriter.flush();
     }
 

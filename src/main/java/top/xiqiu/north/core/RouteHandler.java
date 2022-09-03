@@ -147,6 +147,9 @@ public class RouteHandler {
         }
     }
 
+    /**
+     * 获取要打印的控制器和方法名称，方便打印
+     */
     private static String getReadableMethodName(Method method) {
         String str = method.toString();
         str = str.substring(0, str.lastIndexOf("("));

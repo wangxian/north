@@ -2,7 +2,6 @@ package top.xiqiu.north.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.xiqiu.north.North;
 import top.xiqiu.north.support.JspViewEngine;
 import top.xiqiu.north.support.MethodDispatcher;
 import top.xiqiu.north.support.PebbleViewEngine;
@@ -13,6 +12,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+
+import static top.xiqiu.north.North.config;
 
 // @WebServlet(urlPatterns = "/")
 public class DispatcherServlet extends HttpServlet {
@@ -32,7 +36,7 @@ public class DispatcherServlet extends HttpServlet {
         logger.info("{} init ...", getClass().getSimpleName());
 
         // 初始化模版引擎，如果在配置中设置 north.view-engine = no 则相当于禁用模版引擎
-        String viewEngine = North.config().get("north.view-engine", "pebble");
+        String viewEngine = config().get("north.view-engine", "pebble");
         if ("pebble".equals(viewEngine)) {
             this.viewEngine = new PebbleViewEngine(getServletContext());
         } else if ("jsp".equals(viewEngine)) {
@@ -43,18 +47,18 @@ public class DispatcherServlet extends HttpServlet {
     /**
      * 统一调度请求及相应结果
      *
-     * @param req    请求
-     * @param resp   响应
-     * @param method 网络请求method
+     * @param req           请求
+     * @param resp          响应
+     * @param requestMethod 网络请求method
      */
-    private void dispatch(HttpServletRequest req, HttpServletResponse resp, String method)
+    private void dispatch(HttpServletRequest req, HttpServletResponse resp, String requestMethod)
             throws IOException, ServletException {
 
         // 去除 path 中 context 路径的干扰
         String path = req.getRequestURI().substring(req.getContextPath().length());
 
         // 查找相关的路由处理器
-        MethodDispatcher methodDispatcher = RouteHandler.findDispatcher(method, path);
+        MethodDispatcher methodDispatcher = RouteHandler.findDispatcher(requestMethod, path);
 
         // 路由调度不存在，响应 404 page
         if (methodDispatcher == null) {
@@ -66,8 +70,23 @@ public class DispatcherServlet extends HttpServlet {
         Object invokeResult;
         try {
             invokeResult = methodDispatcher.invoke(req, resp);
+        } catch (InvocationTargetException e) {
+            // e.getTargetException().printStackTrace();
+            logger.error("InvocationTargetException = ", e.getTargetException());
+
+            String errorPage500 = config().get("north.error-page-500", "");
+            if (!"".equals(errorPage500)) {
+                req.setAttribute("errorMessage", e.getTargetException().getMessage());
+                req.setAttribute("errorStackTrace", getStackTraceString(e.getTargetException()));
+                req.getRequestDispatcher(errorPage500).forward(req, resp);
+                return;
+            } else {
+                invokeResult = getStackTraceString(e.getTargetException());
+            }
         } catch (ReflectiveOperationException e) {
-            throw new NorthException(e);
+            logger.error("ReflectiveOperationException = ", e);
+            invokeResult = getStackTraceString(e);
+            return;
         }
 
         // 如果处理器的结果为null，表示控制器内部处理，不再继续往下执行
@@ -113,6 +132,19 @@ public class DispatcherServlet extends HttpServlet {
 
         // flush thr stream
         resp.getWriter().flush();
+    }
+
+    /**
+     * 获取异常堆栈信息
+     */
+    private String getStackTraceString(Throwable e) {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+
+        e.printStackTrace(printWriter);
+        printWriter.close();
+
+        return stringWriter.toString();
     }
 
     @Override

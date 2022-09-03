@@ -3,7 +3,6 @@ package top.xiqiu.north.support;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
 import java.lang.reflect.Method;
 
 /**
@@ -29,7 +28,7 @@ public class GetDispatcher implements MethodDispatcher {
     }
 
     @Override
-    public Object invoke(HttpServletRequest request, HttpServletResponse response) throws IOException, ReflectiveOperationException {
+    public Object invoke(HttpServletRequest request, HttpServletResponse response) throws ReflectiveOperationException {
         Object[] arguments = new Object[this.parameterClasses.length];
         for (int i = 0; i < this.parameterClasses.length; i++) {
             String parameterName = this.parameterNames[i];
