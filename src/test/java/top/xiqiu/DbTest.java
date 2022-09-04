@@ -8,6 +8,7 @@ import top.xiqiu.test.entity.Person;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.List;
 
 public class DbTest {
     /**
@@ -135,15 +136,15 @@ public class DbTest {
     @Test
     public void testMapper() {
 
-        // final List<Person> list =
-        //         DbMapper.of(Person.class)
-        //                 .where("id > ?", 0)
-        //                 // .leftJoin("user b ON a.id=b.id")
-        //                 // .groupBy("id, name")
-        //                 .orderBy("id desc")
-        //                 .limit(100)
-        //                 .findList();
-        // System.out.println(list);
+        final List<Person> list =
+                DbMapper.of(Person.class)
+                        .where("id > ?", 0)
+                        // .leftJoin("user b ON a.id=b.id")
+                        // .groupBy("id, name")
+                        .orderBy("id desc")
+                        .limit(100)
+                        .findList();
+        System.out.println(list);
 
         // final Person p1 = DbMapper.of(Person.class)
         //                           .where("id = ?", 2)
