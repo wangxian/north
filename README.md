@@ -1,2 +1,2 @@
 # North
-A simple &amp; quick starter for Java web
+A Simple / Lightweight / Readable & Quick start framework for Java web
