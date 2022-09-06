@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.core.*;
 
+import java.io.File;
 import java.util.List;
 
 public class North {
@@ -60,7 +61,7 @@ public class North {
      * @param mainAppClass 主入口class
      */
     public static void start(Class<?> mainAppClass) {
-        _startTime = System.currentTimeMillis();
+        _startTime         = System.currentTimeMillis();
         North.mainAppClass = mainAppClass;
 
         // 基本目录，fatjar 路径是 xxx/target/xxx.jar
@@ -82,11 +83,6 @@ public class North {
 
         // 设置 404 / 500 错误页面
         _errorPage();
-
-        // 是否支持 jsp，不使用 jsp 作为模版引擎的时候，可以不设置支持 jsp
-        if ("jsp".equals(North.config().get("north.view-engine", "pebble"))) {
-            _supportJsp();
-        }
 
         // 启动内置web服务器
         _startServer();
@@ -134,31 +130,53 @@ public class North {
             context.setReloadable(true);
         }
 
-        // 资源处理
-        WebResourceRoot resources = new StandardRoot(context);
+        // 是否支持 jsp，不使用 jsp 作为模版引擎的时候，可以不设置支持 jsp
+        if ("jsp".equals(North.config().get("north.view-engine", "no"))) {
+            // 支持 jsp 后缀
+            _supportJsp();
 
-        // 设置 tomcat 运行环境
-        // 开发模式及 fatjar 运行、静态文件处理
-        if (isAppRunInJar) {
-            // classes
-            resources.addJarResources(new JarResourceSet(resources, "/WEB-INF/classes", APP_CLASS_PATH, "/"));
+            // 资源处理
+            WebResourceRoot resources = new StandardRoot(context);
 
-            // templates
-            resources.addJarResources(new JarResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates"));
+            // 设置 jsp templates 映射目录
+            if (isAppRunInJar) {
+                resources.addJarResources(new JarResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates"));
+            } else {
+                // 检测文件是否存在，开发环境检测即可，给出友好的提示
+                if (new File(APP_CLASS_PATH + "templates").exists()) {
+                    throw new RuntimeException("发生错误：使用 jsp 作为模版引擎，必须存在 classpath:templates 目录");
+                }
 
-            // 处理静态文件 /static
-            resources.addJarResources(new JarResourceSet(resources, "/static", APP_CLASS_PATH, "/static"));
-        } else {
-            // classes
-            resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", APP_CLASS_PATH, "/"));
-
-            // templates
-            resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates"));
-
-            // 处理静态文件 /static
-            resources.addPreResources(new DirResourceSet(resources, "/static", APP_CLASS_PATH, "/static"));
+                resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates"));
+            }
+            context.setResources(resources);
         }
-        context.setResources(resources);
+
+        // 不再需要 220917
+        // // 设置 tomcat 运行环境
+        // // 开发模式及 fatjar 运行、静态文件处理
+        // // 资源处理
+        // WebResourceRoot resources = new StandardRoot(context);
+        // if (isAppRunInJar) {
+        //     // classes
+        //     resources.addJarResources(new JarResourceSet(resources, "/WEB-INF/classes", APP_CLASS_PATH, "/"));
+        //
+        //     // templates
+        //     resources.addJarResources(new JarResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates"));
+        //
+        //     // 处理静态文件 /static
+        //     // resources.addJarResources(new JarResourceSet(resources, "/static", APP_CLASS_PATH, "/static"));
+        // } else {
+        //     // classes
+        //     resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", APP_CLASS_PATH, "/"));
+        //
+        //     // templates
+        //     resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates"));
+        //
+        //     // 处理静态文件 /static
+        //     // resources.addPreResources(new DirResourceSet(resources, "/static", APP_CLASS_PATH, "/static"));
+        // }
+        // context.setResources(resources);
 
         // Set scanBootstrapClassPath="true" depending on
         // exactly how your far JAR is packaged / structured
