@@ -10,7 +10,25 @@
   <packaging>jar</packaging>
 
   <name>north</name>
-  <url>https://xiqiu.top</url>
+  <url>https://github.com/wangxian/north</url>
+  <description>A Simple / Lightweight / Readable Java web framework.</description>
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>WangXian</name>
+      <email>xian366@126.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/wangxian/north.git</connection>
+    <developerConnection>scm:git:ssh://github.com:wangxian/north.git</developerConnection>
+    <url>http://github.com/wangxian/north/tree/master</url>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -56,12 +74,6 @@
       <artifactId>HikariCP</artifactId>
       <version>5.0.1</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>8.0.30</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
