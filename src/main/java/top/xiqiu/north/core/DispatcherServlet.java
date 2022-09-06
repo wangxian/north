@@ -36,7 +36,7 @@ public class DispatcherServlet extends HttpServlet {
         logger.info("{} init ...", getClass().getSimpleName());
 
         // 初始化模版引擎，如果在配置中设置 north.view-engine = no 则相当于禁用模版引擎
-        String viewEngine = config().get("north.view-engine", "pebble");
+        String viewEngine = config().get("north.view-engine", "no");
         if ("pebble".equals(viewEngine)) {
             this.viewEngine = new PebbleViewEngine(getServletContext());
         } else if ("jsp".equals(viewEngine)) {
