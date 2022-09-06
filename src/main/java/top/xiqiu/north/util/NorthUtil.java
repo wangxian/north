@@ -3,6 +3,7 @@ package top.xiqiu.north.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 /**
@@ -38,7 +39,7 @@ public class NorthUtil {
     }
 
     /**
-     * 检查字符串 - 非空(!null 或 长度>0)
+     * 检查字符串 - 非空(!null 或 长度&gt;0)
      */
     public static boolean isNotEmpty(String s) {
         return !isEmpty(s);
@@ -91,7 +92,7 @@ public class NorthUtil {
         char[] hexChar = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
         try {
-            byte[] bytesInput = str.getBytes("UTF-8");
+            byte[] bytesInput = str.getBytes(StandardCharsets.UTF_8);
 
             MessageDigest messageDigest = MessageDigest.getInstance(algorithm.toLowerCase());
             messageDigest.update(bytesInput);

@@ -13,7 +13,7 @@ import java.io.IOException;
 /**
  * Pebble template 模版引擎
  *
- * @see <https://pebbletemplates.io/>
+ * @see <a href="https://pebbletemplates.io/">https://pebbletemplates.io/</a>
  */
 public class PebbleViewEngine implements ViewEngine {
 

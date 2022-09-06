@@ -254,7 +254,7 @@ public class DbTemplate {
     /**
      * 批量更新 - 批量更新（指定参数类型）- 预处理SQL
      *
-     * @param batchArgs 参数列表，注意：Object[] 为一次SQL需要的参数，故外层还有一个 List<> 结构
+     * @param batchArgs 参数列表，注意：Object[] 为一次SQL需要的参数，故外层还有一个 List &lt;&gt; 结构
      */
     public int[] batchUpdate(final String sql, List<Object[]> batchArgs, int[] argTypes) {
         return this.batchUpdate(sql, new BatchPreparedStatementSetter() {
@@ -427,7 +427,7 @@ public class DbTemplate {
     }
 
     /**
-     * 查询记录集 - List<T> - RowMapper - args + argTypes
+     * 查询记录集 - List&lt;T&gt; - RowMapper - args + argTypes
      */
     public <T> List<T> query(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) {
         ArrayList<T> arrayList = new ArrayList<>();

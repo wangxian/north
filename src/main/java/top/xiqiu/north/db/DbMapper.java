@@ -47,7 +47,7 @@ public class DbMapper {
      * 创建对象入口
      * <p>
      * 1. 优先，使用 @TableName 注解
-     * 2. 其次，类名首字母小写，转为下划线字符串作为表名, Person - person, UserInfo -> user_info
+     * 2. 其次，类名首字母小写，转为下划线字符串作为表名, Person - person, UserInfo - user_info
      * 3. 否则，请使用 table() 方法主动设置表名
      *
      * @param entity 查询后，映射到 entity，同时也可以根据此推测表名
