@@ -143,7 +143,7 @@ public class North {
                 resources.addJarResources(new JarResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates"));
             } else {
                 // 检测文件是否存在，开发环境检测即可，给出友好的提示
-                if (new File(APP_CLASS_PATH + "templates").exists()) {
+                if (!new File(APP_CLASS_PATH + "templates").exists()) {
                     throw new RuntimeException("发生错误：使用 jsp 作为模版引擎，必须存在 classpath:templates 目录");
                 }
 
