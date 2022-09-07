@@ -44,16 +44,18 @@
       <artifactId>tomcat-embed-core</artifactId>
       <version>${tomcat.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.9.1</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
       <artifactId>tomcat-embed-jasper</artifactId>
       <version>${tomcat.version}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.9.1</version>
     </dependency>
 
     <dependency>
@@ -62,6 +64,7 @@
       <version>1.7.36</version>
       <scope>provided</scope>
     </dependency>
+
     <dependency>
       <groupId>io.pebbletemplates</groupId>
       <artifactId>pebble</artifactId>
@@ -97,17 +100,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.8</version>
-        <extensions>true</extensions>
-        <configuration>
-          <serverId>ossrh</serverId>
-          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
-        </configuration>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -149,6 +141,17 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.8</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+        </configuration>
       </plugin>
 
     </plugins>
