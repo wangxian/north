@@ -2,6 +2,7 @@ package top.xiqiu.north.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.xiqiu.north.North;
 import top.xiqiu.north.support.JspViewEngine;
 import top.xiqiu.north.support.MethodDispatcher;
 import top.xiqiu.north.support.PebbleViewEngine;
@@ -15,8 +16,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
-
-import static top.xiqiu.north.North.config;
 
 // @WebServlet(urlPatterns = "/")
 public class DispatcherServlet extends HttpServlet {
@@ -36,7 +35,7 @@ public class DispatcherServlet extends HttpServlet {
         logger.info("{} init ...", getClass().getSimpleName());
 
         // 初始化模版引擎，如果在配置中设置 north.view-engine = no 则相当于禁用模版引擎
-        String viewEngine = config().get("north.view-engine", "no");
+        String viewEngine = North.config().get("north.view-engine", "no");
         if ("pebble".equals(viewEngine)) {
             this.viewEngine = new PebbleViewEngine(getServletContext());
         } else if ("jsp".equals(viewEngine)) {
@@ -74,7 +73,7 @@ public class DispatcherServlet extends HttpServlet {
             // e.getTargetException().printStackTrace();
             logger.error("InvocationTargetException = ", e.getTargetException());
 
-            String errorPage500 = config().get("north.error-page-500", "");
+            String errorPage500 = North.config().get("north.error-page-500", "");
             if (!"".equals(errorPage500)) {
                 req.setAttribute("errorMessage", e.getTargetException().getMessage());
                 req.setAttribute("errorStackTrace", getStackTraceString(e.getTargetException()));
@@ -86,7 +85,7 @@ public class DispatcherServlet extends HttpServlet {
         } catch (ReflectiveOperationException e) {
             logger.error("ReflectiveOperationException = ", e);
             invokeResult = getStackTraceString(e);
-            return;
+            // return;
         }
 
         // 如果处理器的结果为null，表示控制器内部处理，不再继续往下执行
