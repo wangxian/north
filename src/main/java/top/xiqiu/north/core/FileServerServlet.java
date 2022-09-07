@@ -3,6 +3,7 @@ package top.xiqiu.north.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.North;
+import top.xiqiu.north.util.NorthUtil;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +15,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -24,7 +26,7 @@ public class FileServerServlet extends HttpServlet {
     /**
      * logger
      **/
-    private static Logger logger = LoggerFactory.getLogger(FileServerServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(FileServerServlet.class);
 
     /**
      * 静态资源有效期（秒）
@@ -41,7 +43,7 @@ public class FileServerServlet extends HttpServlet {
             webFilePath = "/static/favicon.ico";
         }
 
-        logger.debug("GET {}", webFilePath);
+        logger.debug("GET {}", webFilePath + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
 
         webFilePath = webFilePath.substring(1);
         final URL resource = this.getClass().getClassLoader().getResource(webFilePath);
@@ -113,7 +115,7 @@ public class FileServerServlet extends HttpServlet {
 
         // Response file content
         OutputStream outputStream = resp.getOutputStream();
-        this.getClass().getClassLoader().getResourceAsStream(webFilePath).transferTo(outputStream);
+        Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream(webFilePath)).transferTo(outputStream);
 
         outputStream.flush();
     }

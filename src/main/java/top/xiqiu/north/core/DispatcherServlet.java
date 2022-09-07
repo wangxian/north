@@ -7,6 +7,7 @@ import top.xiqiu.north.support.JspViewEngine;
 import top.xiqiu.north.support.MethodDispatcher;
 import top.xiqiu.north.support.PebbleViewEngine;
 import top.xiqiu.north.support.ViewEngine;
+import top.xiqiu.north.util.NorthUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -149,28 +150,28 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doGet(req, resp);
-        logger.debug("GET {}", req.getRequestURI());
+        logger.debug("GET {}", req.getRequestURI() + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
         dispatch(req, resp, "get");
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doPost(req, resp);
-        logger.debug("POST {}", req.getRequestURI());
+        logger.debug("POST {}", req.getRequestURI() + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
         dispatch(req, resp, "post");
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doPut(req, resp);
-        logger.debug("PUT {}", req.getRequestURI());
+        logger.debug("PUT {}", req.getRequestURI() + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
         dispatch(req, resp, "put");
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doDelete(req, resp);
-        logger.debug("DELETE {}", req.getRequestURI());
+        logger.debug("DELETE {}", req.getRequestURI() + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
         dispatch(req, resp, "delete");
     }
 }
