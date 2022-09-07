@@ -30,10 +30,8 @@ public class DbMapper {
      * SQL 执行达到终点后，清理临时变量
      */
     private void cleanUp() {
-        if (dbOrmParam != null) {
-            dbOrmParam.remove();
-            // dbOrmParam = null;
-        }
+        dbOrmParam.remove();
+        // dbOrmParam = null;
     }
 
     /**
@@ -231,7 +229,7 @@ public class DbMapper {
                 fullSQL.append(" (").append(dbOrmParam.getFields()).append(") ");
                 fullSQL.append("VALUES (");
 
-                Object[] args = new Object[]{};
+                Object[] args;
 
                 if ("insert".equals(sqlType)) {
                     args = dbOrmParam.getArgs();
@@ -247,9 +245,7 @@ public class DbMapper {
                     args = (Object[]) dbOrmParam.getBatchArgs().get(0);
                 }
 
-                for (int i = 0; i < args.length; i++) {
-                    fullSQL.append("?, ");
-                }
+                fullSQL.append("?, ".repeat(args.length));
                 fullSQL.delete(fullSQL.length() - 2, fullSQL.length());
                 fullSQL.append(")");
 
@@ -309,6 +305,7 @@ public class DbMapper {
      * 查询结果，映射到新的对象
      */
     public <T> DbMapper entity(Class<T> entity) {
+        // noinspection unchecked
         this.dbOrmParam.get().setEntity(entity);
         return this;
     }
@@ -329,6 +326,7 @@ public class DbMapper {
         String sql = prepareSQL("queryOne");
         Object[] args = dbOrmParam.get().getArgs();
 
+        // noinspection unchecked
         final Class<T> entity = dbOrmParam.get().getEntity();
         long timeBegin = System.currentTimeMillis();
         final T result = dbOrmParam.get().getDbTemplate().queryForObject(sql, args, entity);
@@ -347,6 +345,7 @@ public class DbMapper {
         String sql = prepareSQL("query");
         Object[] args = dbOrmParam.get().getArgs();
 
+        // noinspection unchecked
         final Class<T> entity = dbOrmParam.get().getEntity();
         long timeBegin = System.currentTimeMillis();
         final List<T> result = dbOrmParam.get().getDbTemplate().queryForList(sql, args, entity);
@@ -376,10 +375,11 @@ public class DbMapper {
 
         // 结算数据量
         Integer count = dbOrmParam.get().getDbTemplate().queryForObject(sqlCount, args, Integer.class);
-        page.setTotal(count.intValue());
+        page.setTotal(count);
 
         // 查询数据集
         final String sql = prepareSQL("query");
+        // noinspection unchecked
         final Class<T> entity = dbOrmParam.get().getEntity();
         final List<T> result = dbOrmParam.get().getDbTemplate().queryForList(sql, args, entity);
         page.setRecords(result);
@@ -437,6 +437,7 @@ public class DbMapper {
      * 批量插入
      */
     public int[] batchInsert(List<Object[]> batchArgs, int[] argTypes) {
+        // noinspection unchecked
         dbOrmParam.get().setBatchArgs(batchArgs);
         String sql = prepareSQL("batchInsert");
 
@@ -458,17 +459,15 @@ public class DbMapper {
     public int update(boolean isForce, Object... args) {
         // 合并 where 的 args 和 行参的 args
         Object[] argsWhere = dbOrmParam.get().getArgs();
-        if (argsWhere == null) {
-            dbOrmParam.get().setArgs(args);
-        } else {
+
+        if (argsWhere != null) {
             List<Object> argList = new ArrayList<>(Arrays.asList(args));
             argList.addAll(Arrays.asList(argsWhere));
 
             // 重新赋值合，并后的新参数列表
             args = argList.toArray();
-
-            dbOrmParam.get().setArgs(args);
         }
+        dbOrmParam.get().setArgs(args);
 
         String sql = prepareSQL(isForce ? "forceUpdate" : "update");
 
