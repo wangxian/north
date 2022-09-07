@@ -7,6 +7,7 @@ import java.util.*;
 /**
  * 数据库简单操作类
  */
+@SuppressWarnings("unchecked")
 public class DbTemplate {
     private final DataSource dataSource;
     private Connection connection;

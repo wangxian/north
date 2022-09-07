@@ -13,6 +13,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * 快速、轻量的 JDBC 操作工具类
  * base on DbTemplate
  */
+@SuppressWarnings("unchecked")
 public class DbMapper {
     /**
      * logger
