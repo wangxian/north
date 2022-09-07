@@ -88,21 +88,20 @@
   </dependencies>
 
   <distributionManagement>
-    <!--  -->
-    <!--<snapshotRepository>-->
-    <!--  <id>ossrh</id>-->
-    <!--  <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>-->
-    <!--</snapshotRepository>-->
-    <!--<repository>-->
-    <!--  <id>ossrh</id>-->
-    <!--  <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
-    <!--</repository>-->
-
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
     <repository>
-      <id>github</id>
-      <name>GitHub OWNER Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/wangxian/maven-repo</url>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
+
+    <!--<repository>-->
+    <!--  <id>github</id>-->
+    <!--  <name>GitHub OWNER Apache Maven Packages</name>-->
+    <!--  <url>https://maven.pkg.github.com/wangxian/maven-repo</url>-->
+    <!--</repository>-->
   </distributionManagement>
 
   <build>
@@ -153,17 +152,17 @@
           </execution>
         </executions>
       </plugin>
-      <!--<plugin>-->
-      <!--  <groupId>org.sonatype.plugins</groupId>-->
-      <!--  <artifactId>nexus-staging-maven-plugin</artifactId>-->
-      <!--  <version>1.6.8</version>-->
-      <!--  <extensions>true</extensions>-->
-      <!--  <configuration>-->
-      <!--    <serverId>ossrh</serverId>-->
-      <!--    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>-->
-      <!--    <autoReleaseAfterClose>true</autoReleaseAfterClose>-->
-      <!--  </configuration>-->
-      <!--</plugin>-->
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.8</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
 
     </plugins>
   </build>
