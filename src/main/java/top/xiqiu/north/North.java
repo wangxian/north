@@ -297,7 +297,7 @@ public class North {
     private static void onAfterStart(LifecycleEvent event) {
         // 扫描需要预处理的类并处理相关注解
         final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
-        logger.info("[north] 扫描到的类 = {}", classes);
+        // logger.debug("[north] 扫描到的类 = {}", classes);
 
         // 处理 @Controller 注解
         ScanClassWithAnnotations.scanAndStoreControllers(classes);
