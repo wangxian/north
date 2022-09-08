@@ -1,6 +1,8 @@
 package top.xiqiu.north.support;
 
 import com.mitchellbosecke.pebble.PebbleEngine;
+import com.mitchellbosecke.pebble.extension.AbstractExtension;
+import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.loader.ClasspathLoader;
 import com.mitchellbosecke.pebble.template.PebbleTemplate;
 import top.xiqiu.north.core.ModelAndView;
@@ -9,6 +11,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Pebble template 模版引擎
@@ -35,6 +39,14 @@ public class PebbleViewEngine implements ViewEngine {
         this.engine = new PebbleEngine.Builder()
                 .autoEscaping(true)
                 .cacheActive(false)
+                .extension(new AbstractExtension() {
+                    @Override
+                    public Map<String, Filter> getFilters() {
+                        Map<String, Filter> filters = new HashMap<>();
+                        filters.put("json", new PebbleJsonFilter());
+                        return filters;
+                    }
+                })
                 .loader(loader).build();
 
     }
