@@ -6,7 +6,7 @@
 
   <groupId>top.xiqiu</groupId>
   <artifactId>north</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <packaging>jar</packaging>
 
   <name>north</name>
@@ -15,13 +15,19 @@
   <licenses>
     <license>
       <name>The Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
   <developers>
     <developer>
+      <id>WangXian</id>
       <name>WangXian</name>
       <email>xian366@126.com</email>
+      <roles>
+        <role>owner</role>
+        <role>developer</role>
+      </roles>
+      <organization>wboll</organization>
     </developer>
   </developers>
   <scm>
