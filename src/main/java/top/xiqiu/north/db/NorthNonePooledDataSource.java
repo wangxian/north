@@ -95,7 +95,7 @@ public class NorthNonePooledDataSource implements DataSource {
     }
 
     /**
-     * Set configure Connection
+     * Set config Connection
      */
     private void configureConnection(Connection connection) throws SQLException {
         if (defaultNetworkTimeout != null) {

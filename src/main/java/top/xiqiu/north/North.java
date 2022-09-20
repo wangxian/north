@@ -120,7 +120,7 @@ public class North {
         // Set doc base
         tomcat.getHost().setAppBase(DOC_BASE);
 
-        // 创建 context,
+        // 创建 context
         // context = tomcat.addWebapp(DEFAULT_CONTEXT_PATH, DOC_BASE);
         context = tomcat.addContext(DEFAULT_CONTEXT_PATH, DOC_BASE);
 
@@ -277,6 +277,14 @@ public class North {
      * 启动之前触发
      */
     private static void onBeforeStart(LifecycleEvent event) {
+        // 扫描需要预处理的类并处理相关注解
+        final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
+        // logger.debug("[north] 扫描到的类 = {}", classes);
+
+        // 处理 @Controller 注解
+        ScanClassWithAnnotations.scanAndStoreControllers(classes);
+
+        // 处理 @PostConstruct 注解
 
     }
 
@@ -295,13 +303,6 @@ public class North {
      * 启动之后触发
      */
     private static void onAfterStart(LifecycleEvent event) {
-        // 扫描需要预处理的类并处理相关注解
-        final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
-        // logger.debug("[north] 扫描到的类 = {}", classes);
-
-        // 处理 @Controller 注解
-        ScanClassWithAnnotations.scanAndStoreControllers(classes);
-
         // 预处理控制器 xxxMapping 注解
         RouteHandler.processMappings();
     }

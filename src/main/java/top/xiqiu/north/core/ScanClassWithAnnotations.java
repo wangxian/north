@@ -2,6 +2,7 @@ package top.xiqiu.north.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.xiqiu.north.annotation.Component;
 import top.xiqiu.north.annotation.Controller;
 import top.xiqiu.north.util.NorthUtil;
 
@@ -16,6 +17,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 public class ScanClassWithAnnotations {
     /**
@@ -38,15 +40,15 @@ public class ScanClassWithAnnotations {
     /**
      * 查找包下面的类
      *
-     * @param packageName 包名，如：io.webapp.test
+     * @param basePackageName 包名，如：io.webapp.test
      * @return 找到的类
      */
-    public static List<Class<?>> findClasses(String packageName) {
+    public static List<Class<?>> findClasses(String basePackageName) {
         List<Class<?>> classes = new ArrayList<>();
         Enumeration<URL> dirs;
 
         try {
-            String packageDirName = packageName.replace(".", "/");
+            String packageDirName = basePackageName.replace(".", "/");
             dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
         } catch (IOException e) {
             logger.error("failed to get resources: {}", e.getMessage());
@@ -65,7 +67,7 @@ public class ScanClassWithAnnotations {
             // 扫描只需处理 file/jar 即可
             if ("file".equals(protocol)) {
                 // 扫描目录下级所有的类
-                _getClassesByFilePath(packageName, Path.of(url.getFile()), classes);
+                _getClassesByFilePath(basePackageName, Path.of(url.getFile()), classes);
             } else if ("jar".equals(protocol)) {
                 JarFile jarFile;
                 try {
@@ -76,7 +78,7 @@ public class ScanClassWithAnnotations {
                 }
 
                 // 扫描 jar 下级所有的类
-                _getClassesByJar(packageName, jarFile, classes);
+                _getClassesByJar(basePackageName, jarFile, classes);
             }
 
             // LOGGER.info("下级所有的类={}", classes);
@@ -174,5 +176,15 @@ public class ScanClassWithAnnotations {
         }
 
         // LOGGER.info("扫描到的控制器 = {}", storedControllers);
+    }
+
+    /**
+     * 扫描 @Component 注解
+     *
+     * @param classes 包下的所有类
+     * @return
+     */
+    public static List<Class<?>> scanComponents(List<Class<?>> classes) {
+        return classes.stream().filter(clazz -> clazz.getAnnotation(Component.class) != null).collect(Collectors.toList());
     }
 }
