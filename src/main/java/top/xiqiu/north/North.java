@@ -12,6 +12,7 @@ import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.core.*;
+import top.xiqiu.north.support.PostConstructHandler;
 
 import java.io.File;
 import java.util.List;
@@ -198,6 +199,7 @@ public class North {
         context.addServletMappingDecoded("/favicon.ico", "static-files");
 
         // 监听 Server 启动事件
+        // noinspection Convert2Lambda
         context.addLifecycleListener(new LifecycleListener() {
             @Override
             public void lifecycleEvent(LifecycleEvent event) {
@@ -284,8 +286,11 @@ public class North {
         // 处理 @Controller 注解
         ScanClassWithAnnotations.scanAndStoreControllers(classes);
 
-        // 处理 @PostConstruct 注解
+        // 所有的组件 @Component
+        final List<Class<?>> components = ScanClassWithAnnotations.scanComponents(classes);
 
+        // 处理 @PostConstruct 注解
+        PostConstructHandler.invoke(components);
     }
 
     /**
