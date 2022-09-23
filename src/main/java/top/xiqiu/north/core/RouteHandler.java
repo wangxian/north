@@ -69,6 +69,16 @@ public class RouteHandler {
                     controllerContextPath = controllerContextPath.substring(0, controllerContextPath.length() - 1);
                 }
 
+                // 控制器支持 @Autowired
+                Arrays.stream(controllerClass.getDeclaredFields()).filter(field -> field.getAnnotation(Autowired.class) != null).forEach(field -> {
+                    field.setAccessible(true);
+                    try {
+                        field.set(controllerInstance, BeanFactory.getBean(field.getType()));
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                });
+
                 // 处理控制器内的注解方法
                 for (Method method : controllerClass.getMethods()) {
                     if (method.getAnnotation(GetMapping.class) != null || method.getAnnotation(DeleteMapping.class) != null) {
