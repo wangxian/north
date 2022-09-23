@@ -2,8 +2,11 @@ package top.xiqiu.north.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.xiqiu.north.annotation.Bean;
 import top.xiqiu.north.annotation.Component;
+import top.xiqiu.north.annotation.Configuration;
 import top.xiqiu.north.annotation.Controller;
+import top.xiqiu.north.support.BeanStoredEntity;
 import top.xiqiu.north.util.NorthUtil;
 
 import java.io.IOException;
@@ -13,6 +16,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -28,7 +32,12 @@ public class ScanClassWithAnnotations {
     /**
      * 存储 扫描到的控制器(controllers)
      */
-    private static List<Class<?>> storedControllers = new ArrayList<>();
+    private final static List<Class<?>> storedControllers = new ArrayList<>();
+
+    /**
+     * 缓存的 Beans
+     */
+    private final static List<BeanStoredEntity> storedBeans = new ArrayList<>();
 
     /**
      * 获取所有的注解的控制器
@@ -186,5 +195,37 @@ public class ScanClassWithAnnotations {
      */
     public static List<Class<?>> scanComponents(List<Class<?>> classes) {
         return classes.stream().filter(clazz -> clazz.getAnnotation(Component.class) != null).collect(Collectors.toList());
+    }
+
+    /**
+     * 扫描 @Bean 注解
+     *
+     * @param classes 包下的所有类
+     * @return
+     */
+    public static void scanAndStoreBeans(List<Class<?>> classes) {
+        classes.stream().filter(clazz -> clazz.getAnnotation(Configuration.class) != null).forEach(clazz -> {
+            Arrays.stream(clazz.getMethods()).forEach(method -> {
+                if (method.getAnnotation(Bean.class) != null) {
+                    // 执行对象实例
+                    Object instance;
+
+                    try {
+                        instance = method.invoke(clazz.getConstructor().newInstance());
+                    } catch (ReflectiveOperationException e) {
+                        throw new NorthException(e);
+                    }
+
+                    storedBeans.add(new BeanStoredEntity(method.getName(), method.getReturnType(), instance));
+                }
+            });
+        });
+    }
+
+    /**
+     * 获得存储的 beans
+     */
+    public static List<BeanStoredEntity> getStoredBeans() {
+        return storedBeans;
     }
 }

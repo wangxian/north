@@ -291,6 +291,9 @@ public class North {
 
         // 处理 @PostConstruct 注解
         PostConstructHandler.invoke(components);
+
+        // 处理 @Bean 注解
+        ScanClassWithAnnotations.scanAndStoreBeans(classes);
     }
 
     /**
