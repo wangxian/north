@@ -3,10 +3,7 @@ package top.xiqiu.north.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.North;
-import top.xiqiu.north.support.JspViewEngine;
-import top.xiqiu.north.support.MethodDispatcher;
-import top.xiqiu.north.support.PebbleViewEngine;
-import top.xiqiu.north.support.ViewEngine;
+import top.xiqiu.north.support.*;
 import top.xiqiu.north.util.NorthUtil;
 
 import javax.servlet.ServletException;
@@ -53,6 +50,19 @@ public class DispatcherServlet extends HttpServlet {
      */
     private void dispatch(HttpServletRequest req, HttpServletResponse resp, String requestMethod)
             throws IOException, ServletException {
+
+        // 拦截网络请求
+        final URLInterceptorAdapter bean = BeanFactory.getBean(URLInterceptorAdapter.class);
+        if (bean != null) {
+            try {
+                // 被拦截，不再继续往下执行
+                if (!bean.preHandle(req, resp)) {
+                    return;
+                }
+            } catch (Exception e) {
+                throw new NorthException(e);
+            }
+        }
 
         // 去除 path 中 context 路径的干扰
         String path = req.getRequestURI().substring(req.getContextPath().length());

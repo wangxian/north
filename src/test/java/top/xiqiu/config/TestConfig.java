@@ -15,11 +15,11 @@ public class TestConfig {
 
     @PostConstruct
     public void testAbc() {
-        System.out.println("---------- 这里是 TestConfig.testAbc");
+        System.out.println("---------- 这里是 @Component TestConfig.testAbc");
     }
 
     @PostConstruct
     public void testDef() {
-        System.out.println("---------- 这里是 TestConfig.testDef");
+        System.out.println("---------- 这里是 @Component TestConfig.testDef");
     }
 }
