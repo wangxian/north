@@ -72,7 +72,7 @@ public class North {
         // 在 fatjar 下运行
         if (APP_CLASS_PATH.endsWith(".jar")) {
             isAppRunInJar = true;
-            System.out.println(mainAppClass.getProtectionDomain().getCodeSource().getLocation().toString());
+            // System.out.println(mainAppClass.getProtectionDomain().getCodeSource().getLocation().toString());
         }
 
         if (isAppRunInJar) {
@@ -102,7 +102,11 @@ public class North {
         int port = config().getInt("server.port", 8080);
 
         // 设置基础目录，为了安全，指定临时目录
-        String tmpdir = System.getProperty("java.io.tmpdir") + "north-tomcat-" + port + "-" + System.currentTimeMillis();
+        String tmpdir = System.getProperty("java.io.tmpdir");
+        if (!tmpdir.endsWith("/")) {
+            tmpdir = tmpdir + "/";
+        }
+        tmpdir = tmpdir + "north-tomcat-" + port + "-" + System.currentTimeMillis();
         tomcat.setBaseDir(tmpdir);
         logger.debug("[north] server.tmpdir={}", tmpdir);
 
