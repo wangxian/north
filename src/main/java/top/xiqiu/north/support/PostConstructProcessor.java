@@ -6,7 +6,7 @@ import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.List;
 
-public class PostConstructHandler {
+public class PostConstructProcessor {
 
     /**
      * 执行 PostConstruct 的方法

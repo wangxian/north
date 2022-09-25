@@ -12,7 +12,7 @@ import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.core.*;
-import top.xiqiu.north.support.PostConstructHandler;
+import top.xiqiu.north.support.PostConstructProcessor;
 
 import java.io.File;
 import java.util.List;
@@ -294,7 +294,7 @@ public class North {
         final List<Class<?>> components = ScanClassWithAnnotations.scanComponents(classes);
 
         // 处理 @PostConstruct 注解
-        PostConstructHandler.invoke(components);
+        PostConstructProcessor.invoke(components);
 
         // 处理 @Bean 注解
         ScanClassWithAnnotations.scanAndStoreBeans(classes);
