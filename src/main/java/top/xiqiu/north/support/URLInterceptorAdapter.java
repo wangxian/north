@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public abstract class URLInterceptorAdapter {
-
     /**
      * This implementation always returns true.
      */

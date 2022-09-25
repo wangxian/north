@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.core.*;
 import top.xiqiu.north.support.PostConstructProcessor;
+import top.xiqiu.north.support.URLInterceptorAdapter;
 
 import java.io.File;
 import java.util.List;
@@ -346,5 +347,12 @@ public class North {
      */
     public static AppConfig config() {
         return AppConfig.of();
+    }
+
+    /**
+     * 注册一个 interceptor
+     */
+    public static void interceptor(URLInterceptorAdapter interceptor) {
+        ScanClassWithAnnotations.addStoredInterceptors(interceptor);
     }
 }

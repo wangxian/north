@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 // @WebServlet(urlPatterns = "/")
 public class DispatcherServlet extends HttpServlet {
@@ -52,11 +53,11 @@ public class DispatcherServlet extends HttpServlet {
             throws IOException, ServletException {
 
         // 拦截网络请求
-        final URLInterceptorAdapter bean = BeanFactory.getBean(URLInterceptorAdapter.class);
-        if (bean != null) {
+        List<URLInterceptorAdapter> interceptors = ScanClassWithAnnotations.getStoredInterceptors();
+        for (URLInterceptorAdapter interceptor : interceptors) {
             try {
                 // 被拦截，不再继续往下执行
-                if (!bean.preHandle(req, resp)) {
+                if (!interceptor.preHandle(req, resp)) {
                     return;
                 }
             } catch (Exception e) {

@@ -7,6 +7,7 @@ import top.xiqiu.north.annotation.Component;
 import top.xiqiu.north.annotation.Configuration;
 import top.xiqiu.north.annotation.Controller;
 import top.xiqiu.north.support.BeanStoredEntity;
+import top.xiqiu.north.support.URLInterceptorAdapter;
 import top.xiqiu.north.util.NorthUtil;
 
 import java.io.IOException;
@@ -38,6 +39,11 @@ public class ScanClassWithAnnotations {
      * 缓存的 Beans
      */
     private final static List<BeanStoredEntity> storedBeans = new ArrayList<>();
+
+    /**
+     * 缓存的 Interceptors
+     */
+    private final static List<URLInterceptorAdapter> storedInterceptors = new ArrayList<>();
 
     /**
      * 获取所有的注解的控制器
@@ -227,5 +233,19 @@ public class ScanClassWithAnnotations {
      */
     public static List<BeanStoredEntity> getStoredBeans() {
         return storedBeans;
+    }
+
+    /**
+     * 增加 interceptor
+     */
+    public static void addStoredInterceptors(URLInterceptorAdapter interceptor) {
+        storedInterceptors.add(interceptor);
+    }
+
+    /**
+     * 获得存储的 Interceptors
+     */
+    public static List<URLInterceptorAdapter> getStoredInterceptors() {
+        return storedInterceptors;
     }
 }
