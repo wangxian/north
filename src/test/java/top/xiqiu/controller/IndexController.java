@@ -2,7 +2,7 @@ package top.xiqiu.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.xiqiu.config.User;
+import top.xiqiu.entity.User;
 import top.xiqiu.north.annotation.Autowired;
 import top.xiqiu.north.annotation.Controller;
 import top.xiqiu.north.annotation.GetMapping;

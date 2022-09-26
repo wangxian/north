@@ -294,11 +294,14 @@ public class North {
         // 所有的组件 @Component
         final List<Class<?>> components = ScanClassWithAnnotations.scanComponents(classes);
 
-        // 处理 @PostConstruct 注解
+        // 处理 @PostConstruct 注解，并执行
         PostConstructProcessor.invoke(components);
 
-        // 处理 @Bean 注解
+        // 处理 @Bean 注解 + 初始化
         ScanClassWithAnnotations.scanAndStoreBeans(classes);
+
+        // 处理 @Service 注解 + 初始化
+        ScanClassWithAnnotations.scanAndStoreService(classes);
     }
 
     /**

@@ -1,4 +1,4 @@
-package top.xiqiu.config;
+package top.xiqiu.entity;
 
 import top.xiqiu.north.annotation.Bean;
 import top.xiqiu.north.annotation.Configuration;

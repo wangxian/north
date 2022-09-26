@@ -1,4 +1,4 @@
-package top.xiqiu.config;
+package top.xiqiu.entity;
 
 public class User {
     public String name;

@@ -2,10 +2,8 @@ package top.xiqiu.north.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.xiqiu.north.annotation.Bean;
-import top.xiqiu.north.annotation.Component;
-import top.xiqiu.north.annotation.Configuration;
-import top.xiqiu.north.annotation.Controller;
+import top.xiqiu.north.annotation.*;
+import top.xiqiu.north.support.BeanFactory;
 import top.xiqiu.north.support.BeanStoredEntity;
 import top.xiqiu.north.support.URLInterceptorAdapter;
 import top.xiqiu.north.util.NorthUtil;
@@ -197,19 +195,18 @@ public class ScanClassWithAnnotations {
      * 扫描 @Component 注解
      *
      * @param classes 包下的所有类
-     * @return
      */
     public static List<Class<?>> scanComponents(List<Class<?>> classes) {
         return classes.stream().filter(clazz -> clazz.getAnnotation(Component.class) != null).collect(Collectors.toList());
     }
 
     /**
-     * 扫描 @Bean 注解
+     * 扫描 @Bean 注解，并初始化
      *
      * @param classes 包下的所有类
-     * @return
      */
     public static void scanAndStoreBeans(List<Class<?>> classes) {
+        // noinspection LambdaParameterTypeCanBeSpecified,CodeBlock2Expr
         classes.stream().filter(clazz -> clazz.getAnnotation(Configuration.class) != null).forEach(clazz -> {
             Arrays.stream(clazz.getMethods()).forEach(method -> {
                 if (method.getAnnotation(Bean.class) != null) {
@@ -226,6 +223,78 @@ public class ScanClassWithAnnotations {
                 }
             });
         });
+    }
+
+    /**
+     * 扫描 @Service 注解，并初始化
+     *
+     * @param classes 包下的所有类
+     */
+    public static void scanAndStoreService(List<Class<?>> classes) {
+        // 找到所有的 @Service
+        List<Class<?>> services = classes.stream().filter(clazz -> clazz.getAnnotation(Service.class) != null).collect(Collectors.toList());
+
+        // 先处理一遍所有的 Servers，然后再处理 autowired 的注入
+        for (Class<?> clazz : services) {
+            // 执行对象实例
+            Object instance;
+
+            try {
+                instance = clazz.getConstructor().newInstance();
+            } catch (ReflectiveOperationException e) {
+                throw new NorthException(e);
+            }
+
+            // noinspection DuplicatedCode
+            String beanName;
+            Class<?> beanReturnType;
+
+            // 可能未实现服务接口
+            Class<?>[] interfaces = clazz.getInterfaces();
+            if (interfaces.length > 0) {
+                beanName       = interfaces[0].getName();
+                beanReturnType = interfaces[0];
+            } else {
+                beanName       = clazz.getName();
+                beanReturnType = clazz;
+            }
+
+            storedBeans.add(new BeanStoredEntity(beanName, beanReturnType, instance));
+        }
+
+        // 处理 autowired 的注入，service 相互依赖
+        for (Class<?> clazz : services) {
+            // noinspection DuplicatedCode
+            String beanName;
+            Class<?> beanReturnType;
+
+            Class<?>[] interfaces = clazz.getInterfaces();
+            if (interfaces.length > 0) {
+                beanName       = interfaces[0].getName();
+                beanReturnType = interfaces[0];
+            } else {
+                beanName       = clazz.getName();
+                beanReturnType = clazz;
+            }
+
+            // 获得已实例化的 service 对象
+            Object clazzInstance = BeanFactory.getBean(beanName, beanReturnType);
+
+            // 注入 Autowired 修饰的属性
+            Arrays.stream(clazz.getDeclaredFields()).forEach(field -> {
+                if (field.getAnnotation(Autowired.class) != null) {
+                    Object beanInstance = BeanFactory.getBean(field.getType());
+                    if (beanInstance != null) {
+                        field.setAccessible(true);
+                        try {
+                            field.set(clazzInstance, beanInstance);
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+        }
     }
 
     /**

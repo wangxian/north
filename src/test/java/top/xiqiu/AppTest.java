@@ -1,12 +1,12 @@
 package top.xiqiu;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import top.xiqiu.config.User;
+import top.xiqiu.entity.User;
 import top.xiqiu.north.North;
 import top.xiqiu.north.core.ScanClassWithAnnotations;
 import top.xiqiu.north.support.BeanFactory;
+import top.xiqiu.service.UserService;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public class AppTest {
     }
 
     // execute only once, in the starting
-    @BeforeClass
+    // @BeforeClass
     public static void beforeClass() {
         System.out.println("in before class");
     }
@@ -43,5 +43,11 @@ public class AppTest {
         final User userBean2 = (User) BeanFactory.getBean("userBean", User.class);
 
         Assert.assertEquals("测试：：是否是一个对象", userBean, userBean2);
+
+        ScanClassWithAnnotations.scanAndStoreService(classes);
+        UserService userService = BeanFactory.getBean(UserService.class);
+        userService.sayName();
+
+
     }
 }

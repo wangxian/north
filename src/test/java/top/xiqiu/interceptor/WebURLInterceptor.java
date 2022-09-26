@@ -1,4 +1,4 @@
-package top.xiqiu.config;
+package top.xiqiu.interceptor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
