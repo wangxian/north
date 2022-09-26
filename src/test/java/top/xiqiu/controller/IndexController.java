@@ -6,7 +6,7 @@ import top.xiqiu.entity.User;
 import top.xiqiu.north.annotation.Autowired;
 import top.xiqiu.north.annotation.Controller;
 import top.xiqiu.north.annotation.GetMapping;
-import top.xiqiu.north.support.BeanFactory;
+import top.xiqiu.service.UserService;
 
 @Controller
 public class IndexController {
@@ -18,11 +18,17 @@ public class IndexController {
     @Autowired
     private User user;
 
+    @Autowired
+    private UserService userService;
+
     @GetMapping("/")
     public String index() {
         // 是同一个 User 对象
-        System.out.println(user);
-        System.out.println(BeanFactory.getBean(User.class));
+        // System.out.println(user.hashCode());
+        // System.out.println(BeanFactory.getBean(User.class).hashCode());
+
+        logger.info("User user = {}", user.toString());
+        userService.sayName();
 
         return "hello world!";
     }
