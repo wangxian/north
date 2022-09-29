@@ -3,9 +3,7 @@ package top.xiqiu.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.entity.User;
-import top.xiqiu.north.annotation.Autowired;
-import top.xiqiu.north.annotation.Controller;
-import top.xiqiu.north.annotation.GetMapping;
+import top.xiqiu.north.annotation.*;
 import top.xiqiu.service.UserService;
 
 @Controller
@@ -30,6 +28,11 @@ public class IndexController {
         logger.info("User user = {}", user.toString());
         userService.sayName();
 
+        return "hello world!";
+    }
+
+    @GetMapping("/profile/{id}")
+    public String profile(@PathVariable("id") Integer id, @RequestParam(value = "name", required = false, defaultValue = "王昊") String name) {
         return "hello world!";
     }
 
