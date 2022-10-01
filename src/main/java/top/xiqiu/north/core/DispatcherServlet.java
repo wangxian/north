@@ -47,9 +47,8 @@ public class DispatcherServlet extends HttpServlet {
      *
      * @param req           请求
      * @param resp          响应
-     * @param requestMethod 网络请求method
      */
-    private void dispatch(HttpServletRequest req, HttpServletResponse resp, String requestMethod)
+    private void dispatch(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
 
         // 拦截网络请求
@@ -65,11 +64,8 @@ public class DispatcherServlet extends HttpServlet {
             }
         }
 
-        // 去除 path 中 context 路径的干扰
-        String path = req.getRequestURI().substring(req.getContextPath().length());
-
         // 查找相关的路由处理器
-        MethodDispatcher methodDispatcher = RouteHandler.findDispatcher(requestMethod, path);
+        MethodDispatcher methodDispatcher = RouteHandler.findDispatcher(req);
 
         // 路由调度不存在，响应 404 page
         if (methodDispatcher == null) {
@@ -162,27 +158,27 @@ public class DispatcherServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doGet(req, resp);
         logger.debug("GET {}", req.getRequestURI() + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
-        dispatch(req, resp, "get");
+        dispatch(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doPost(req, resp);
         logger.debug("POST {}", req.getRequestURI() + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
-        dispatch(req, resp, "post");
+        dispatch(req, resp);
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doPut(req, resp);
         logger.debug("PUT {}", req.getRequestURI() + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
-        dispatch(req, resp, "put");
+        dispatch(req, resp);
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doDelete(req, resp);
         logger.debug("DELETE {}", req.getRequestURI() + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
-        dispatch(req, resp, "delete");
+        dispatch(req, resp);
     }
 }

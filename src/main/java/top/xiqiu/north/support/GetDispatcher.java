@@ -12,27 +12,19 @@ public class GetDispatcher implements MethodDispatcher {
 
     private final Object instance;
     private final Method method;
-    private final String[] parameterNames;
-    private final Class<?>[] parameterClasses;
+    private final MethodParameter[] methodParameters;
 
-    public GetDispatcher(Object instance, Method method, String[] parameterNames, Class<?>[] parameterClasses) {
+    public GetDispatcher(Object instance, Method method, MethodParameter[] methodParameters) {
         this.instance         = instance;
         this.method           = method;
-        this.parameterNames   = parameterNames;
-        this.parameterClasses = parameterClasses;
-    }
-
-    private String getOrDefault(HttpServletRequest request, String name, String defaultValue) {
-        String value = request.getParameter(name);
-        return value != null ? value : defaultValue;
+        this.methodParameters = methodParameters;
     }
 
     @Override
     public Object invoke(HttpServletRequest request, HttpServletResponse response) throws ReflectiveOperationException {
-        Object[] arguments = new Object[this.parameterClasses.length];
-        for (int i = 0; i < this.parameterClasses.length; i++) {
-            String parameterName = this.parameterNames[i];
-            Class<?> parameterClass = this.parameterClasses[i];
+        Object[] arguments = new Object[this.methodParameters.length];
+        for (int i = 0; i < this.methodParameters.length; i++) {
+            Class<?> parameterClass = this.methodParameters[i].getClassType();
 
             if (parameterClass == HttpServletRequest.class) {
                 arguments[i] = request;
@@ -42,32 +34,32 @@ public class GetDispatcher implements MethodDispatcher {
                 arguments[i] = request.getSession();
             } else if (parameterClass == Integer.class) {
                 try {
-                    arguments[i] = Integer.valueOf(getOrDefault(request, parameterName, "0"));
+                    arguments[i] = Integer.valueOf(getOrDefault(request, this.methodParameters[i], "0"));
                 } catch (NumberFormatException e) {
-                    arguments[i] = Integer.valueOf(0);
+                    arguments[i] = 0;
                 }
             } else if (parameterClass == Long.class) {
                 try {
-                    arguments[i] = Long.valueOf(getOrDefault(request, parameterName, "0"));
+                    arguments[i] = Long.valueOf(getOrDefault(request, this.methodParameters[i], "0"));
                 } catch (NumberFormatException e) {
-                    arguments[i] = Long.valueOf(0);
+                    arguments[i] = 0L;
                 }
             } else if (parameterClass == Float.class) {
                 try {
-                    arguments[i] = Float.valueOf(getOrDefault(request, parameterName, "0"));
+                    arguments[i] = Float.valueOf(getOrDefault(request, this.methodParameters[i], "0"));
                 } catch (NumberFormatException e) {
-                    arguments[i] = Float.valueOf(0);
+                    arguments[i] = (float) 0;
                 }
             } else if (parameterClass == Double.class) {
                 try {
-                    arguments[i] = Double.valueOf(getOrDefault(request, parameterName, "0"));
+                    arguments[i] = Double.valueOf(getOrDefault(request, this.methodParameters[i], "0"));
                 } catch (NumberFormatException e) {
-                    arguments[i] = Double.valueOf(0);
+                    arguments[i] = (double) 0;
                 }
             } else if (parameterClass == Boolean.class) {
-                arguments[i] = Boolean.valueOf(getOrDefault(request, parameterName, "0"));
+                arguments[i] = Boolean.valueOf(getOrDefault(request, this.methodParameters[i], "0"));
             } else if (parameterClass == String.class) {
-                arguments[i] = String.valueOf(getOrDefault(request, parameterName, ""));
+                arguments[i] = String.valueOf(getOrDefault(request, this.methodParameters[i], ""));
             } else {
                 throw new RuntimeException("invalid parameter class type: " + parameterClass);
             }

@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,6 +82,35 @@ public class RouteHandler {
 
                 // 处理控制器内的注解方法
                 for (Method method : controllerClass.getMethods()) {
+
+                    // 参数名称
+                    Class<?>[] parameterTypes = method.getParameterTypes();
+                    Parameter[] parameters = method.getParameters();
+
+                    // 整理形参结构
+                    MethodParameter[] methodParameters = new MethodParameter[parameters.length];
+
+                    for (int i = 0; i < parameters.length; i++) {
+                        Parameter p = parameters[i];
+
+                        MethodParameter methodParameter = new MethodParameter();
+                        methodParameter.setName(p.getName());
+                        methodParameter.setClassType(parameterTypes[i]);
+
+                        if (p.getAnnotation(RequestParam.class) != null) {
+                            RequestParam requestParam = p.getAnnotation(RequestParam.class);
+                            methodParameter.setName(requestParam.value());
+                            methodParameter.setDefaultValue(requestParam.defaultValue());
+                            methodParameter.setRequired(requestParam.required());
+                        }
+
+                        if (p.getAnnotation(PathVariable.class) != null) {
+                            methodParameter.setName(p.getAnnotation(PathVariable.class).value());
+                        }
+
+                        methodParameters[i] = methodParameter;
+                    }
+
                     if (method.getAnnotation(GetMapping.class) != null || method.getAnnotation(DeleteMapping.class) != null) {
                         // // 检查返回值类型
                         // if (method.getReturnType() != ModelAndView.class && method.getReturnType() != void.class) {
@@ -95,23 +125,21 @@ public class RouteHandler {
                             }
                         }
 
-                        // 参数名称
-                        String[] parameterNames = Arrays.stream(method.getParameters()).map(p -> p.getName()).toArray(String[]::new);
-
                         if (method.getAnnotation(GetMapping.class) != null) {
                             String path = controllerContextPath + method.getAnnotation(GetMapping.class).value();
 
                             logger.info("[north] [route]     GET {} -> {}", path, getReadableMethodName(method));
-                            getMappings.put(path, new GetDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
+                            getMappings.put(path, new GetDispatcher(controllerInstance, method, methodParameters));
                         } else {
                             String path = controllerContextPath + method.getAnnotation(DeleteMapping.class).value();
 
                             logger.info("[north] [route]  DELETE {} -> {}", path, getReadableMethodName(method));
-                            deleteMappings.put(path, new DeleteDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes()));
+                            deleteMappings.put(path, new DeleteDispatcher(controllerInstance, method, methodParameters));
                         }
                     } else if (method.getAnnotation(PostMapping.class) != null
                             || method.getAnnotation(RequestMapping.class) != null
                             || method.getAnnotation(PutMapping.class) != null) {
+
                         // // 检查返回值类型
                         // if (method.getReturnType() != ModelAndView.class && method.getReturnType() != void.class) {
                         //     throw new UnsupportedOperationException("Unsupported return type:" + method.getReturnType() + " for method:" + method);
@@ -130,24 +158,21 @@ public class RouteHandler {
                             }
                         }
 
-                        // 参数名称
-                        String[] parameterNames = Arrays.stream(method.getParameters()).map(p -> p.getName()).toArray(String[]::new);
-
                         if (method.getAnnotation(PostMapping.class) != null) {
                             String path = controllerContextPath + method.getAnnotation(PostMapping.class).value();
 
                             logger.info("[north] [route]    POST {} -> {}", path, getReadableMethodName(method));
-                            postMappings.put(path, new PostDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes(), new JsonConverter()));
+                            postMappings.put(path, new PostDispatcher(controllerInstance, method, methodParameters));
                         } else if (method.getAnnotation(RequestMapping.class) != null) {
                             String path = controllerContextPath + method.getAnnotation(RequestMapping.class).value();
 
                             logger.info("[north] [route] REQUEST {} -> {}", path, getReadableMethodName(method));
-                            requestMappings.put(path, new RequestDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes(), new JsonConverter()));
+                            requestMappings.put(path, new RequestDispatcher(controllerInstance, method, methodParameters));
                         } else {
                             String path = controllerContextPath + method.getAnnotation(PutMapping.class).value();
 
                             logger.info("[north] [route]     PUT {} -> {}", path, getReadableMethodName(method));
-                            putMappings.put(path, new PutDispatcher(controllerInstance, method, parameterNames, method.getParameterTypes(), new JsonConverter()));
+                            putMappings.put(path, new PutDispatcher(controllerInstance, method, methodParameters));
                         }
                     }
                 }
@@ -173,23 +198,23 @@ public class RouteHandler {
 
     /**
      * 查找相关的路由处理器
-     *
-     * @param method 网络请求method
-     * @param path   请求路径
      */
-    public static MethodDispatcher findDispatcher(String method, String path) {
+    public static MethodDispatcher findDispatcher(HttpServletRequest req) {
+        // 去除 path 中 context 路径的干扰
+        String path = req.getRequestURI().substring(req.getContextPath().length());
+
         MethodDispatcher dispatcher = null;
-        switch (method) {
-            case "get":
+        switch (req.getMethod()) {
+            case "GET":
                 dispatcher = getMappings.get(path);
                 break;
-            case "post":
+            case "POST":
                 dispatcher = postMappings.get(path);
                 break;
-            case "put":
+            case "PUT":
                 dispatcher = putMappings.get(path);
                 break;
-            case "delete":
+            case "DELETE":
                 dispatcher = deleteMappings.get(path);
                 break;
         }
@@ -200,6 +225,70 @@ public class RouteHandler {
         }
 
         // 返回 requestMappings 的处理器，但也可能路径还是不存在，最后还是返回 null，匹配失败
-        return requestMappings.get(path);
+        MethodDispatcher requestDispatcher = requestMappings.get(path);
+        if (requestDispatcher != null) {
+            return requestDispatcher;
+        }
+
+        // 如果还是不存在，开始匹配 PathVariable
+        //----------------------------------
+
+        // 查找可用的 dispatcher
+        HashMap<String, MethodDispatcher> methodDispatchers = new HashMap<>();
+        switch (req.getMethod()) {
+            case "GET":
+                getMappings.forEach((key, value) -> methodDispatchers.merge(key, value, (v1, v2) -> v1));
+                break;
+            case "POST":
+                postMappings.forEach((key, value) -> methodDispatchers.merge(key, value, (v1, v2) -> v1));
+                break;
+            case "PUT":
+                putMappings.forEach((key, value) -> methodDispatchers.merge(key, value, (v1, v2) -> v1));
+                break;
+            case "DELETE":
+                deleteMappings.forEach((key, value) -> methodDispatchers.merge(key, value, (v1, v2) -> v1));
+                break;
+        }
+
+        // 合并 request 路由
+        requestMappings.forEach((key, value) -> methodDispatchers.merge(key, value, (v1, v2) -> v1));
+
+        // 兼容尾部是 / 的URL
+        if (path.endsWith("/")) {
+            path = path.substring(1, path.length() - 1);
+        }
+        String[] requestUrlPart = path.split("/");
+
+        for(Map.Entry<String, MethodDispatcher> entry : methodDispatchers.entrySet()) {
+            String routePath = entry.getKey();
+
+            if (routePath.endsWith("/")) {
+                routePath = routePath.substring(1, routePath.length() - 1);
+            }
+
+            String[] routeUrlPart = routePath.split("/");
+
+            // url 长度不一样，直接跳过
+            if (requestUrlPart.length != routeUrlPart.length) {
+                continue;
+            }
+
+            HashMap<String, String> pathVariable = new HashMap<>();
+            for (int i = 0; i < routeUrlPart.length; i++) {
+                if (routeUrlPart[i].contains("{")) {
+                    pathVariable.put(routeUrlPart[i].substring(1, routeUrlPart[i].length() - 1), requestUrlPart[i]);
+                } else if (!routeUrlPart[i].equals(requestUrlPart[i])) {
+                    break;
+                }
+            }
+
+            // 匹配成功
+            if (pathVariable.size() > 0) {
+                pathVariable.forEach((key, value) -> req.setAttribute("_path_variable_" + key, value));
+                return entry.getValue();
+            }
+        }
+
+        return null;
     }
 }
