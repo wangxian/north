@@ -99,13 +99,19 @@ public class RouteHandler {
 
                         if (p.getAnnotation(RequestParam.class) != null) {
                             RequestParam requestParam = p.getAnnotation(RequestParam.class);
-                            methodParameter.setName(requestParam.value());
+                            if (requestParam.value() != null && !"".equals(requestParam.value())) {
+                                methodParameter.setName(requestParam.value());
+                            }
+
                             methodParameter.setDefaultValue(requestParam.defaultValue());
                             methodParameter.setRequired(requestParam.required());
                         }
 
                         if (p.getAnnotation(PathVariable.class) != null) {
-                            methodParameter.setName(p.getAnnotation(PathVariable.class).value());
+                            String name = p.getAnnotation(PathVariable.class).value();
+                            if (name != null && !"".equals(name)) {
+                                methodParameter.setName(name);
+                            }
                         }
 
                         methodParameters[i] = methodParameter;
