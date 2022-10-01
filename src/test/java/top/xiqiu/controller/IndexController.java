@@ -32,7 +32,7 @@ public class IndexController {
     }
 
     @GetMapping("/profile/{id}")
-    public String profile(@PathVariable("id") Integer id, @RequestParam(value = "name", required = false, defaultValue = "王昊") String name) {
+    public String profile(@PathVariable("id") Long id, @RequestParam(value = "name", required = false, defaultValue = "王昊") String name) {
         return String.format("hello world! --- name = %s, id = %d", name, id);
     }
 

@@ -260,19 +260,19 @@ public class RouteHandler {
         requestMappings.forEach((key, value) -> methodDispatchers.merge(key, value, (v1, v2) -> v1));
 
         // 兼容尾部是 / 的URL
-        if (path.endsWith("/")) {
-            path = path.substring(1, path.length() - 1);
+        if (path.length() > 1 && path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
         }
-        String[] requestUrlPart = path.split("/");
+        String[] requestUrlPart = path.substring(1).split("/");
 
         for(Map.Entry<String, MethodDispatcher> entry : methodDispatchers.entrySet()) {
             String routePath = entry.getKey();
 
-            if (routePath.endsWith("/")) {
-                routePath = routePath.substring(1, routePath.length() - 1);
+            if (routePath.length() > 1 && routePath.endsWith("/")) {
+                routePath = routePath.substring(0, routePath.length() - 1);
             }
 
-            String[] routeUrlPart = routePath.split("/");
+            String[] routeUrlPart = routePath.substring(1).split("/");
 
             // url 长度不一样，直接跳过
             if (requestUrlPart.length != routeUrlPart.length) {
@@ -284,6 +284,8 @@ public class RouteHandler {
                 if (routeUrlPart[i].contains("{")) {
                     pathVariable.put(routeUrlPart[i].substring(1, routeUrlPart[i].length() - 1), requestUrlPart[i]);
                 } else if (!routeUrlPart[i].equals(requestUrlPart[i])) {
+                    // 匹配失败，重置
+                    pathVariable = new HashMap<String, String>();
                     break;
                 }
             }
