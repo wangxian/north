@@ -19,7 +19,7 @@ A Simple / Lightweight / Readable & Quick start framework for Java web
   <dependency>
     <groupId>top.xiqiu</groupId>
     <artifactId>north</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.5</version>
   </dependency>
 </dependencies>
 ```
@@ -35,7 +35,7 @@ import top.xiqiu.north.North;
  */
 public class App {
     public static void main(String[] args) {
-        North.start(App.class);
+        North.start(App.class, args);
     }
 }
 
