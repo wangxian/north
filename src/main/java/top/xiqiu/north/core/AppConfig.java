@@ -25,9 +25,21 @@ public class AppConfig extends Properties {
 
     /**
      * 初始化配置（单例）
-     * 配置的优先级：环境变量 - 系统属性 - application-prod.properties - application.properties
+     * 配置的优先级：args property > 环境变量 > 系统属性 > application-prod.properties > application.properties
      */
     public static AppConfig of() {
+        if (_appConfig != null) {
+            return _appConfig;
+        }
+
+        return of(new String[]{});
+    }
+
+    /**
+     * 初始化配置（单例）
+     * @param args 程序启动参数
+     */
+    public static AppConfig of(String[] args) {
         if (_appConfig == null) {
             _appConfig = new AppConfig();
 
@@ -37,12 +49,23 @@ public class AppConfig extends Properties {
                     _appConfig.load(resourceAsStream);
                 }
             } catch (IOException e) {
+                // application.properties 不存在
             }
 
-            // 初始化运行环境 env，环境变量到优先级 > 系统属性
-            _appConfig.env = System.getenv("NORTH_ENV");
+            // 初始化运行环境 AppConfig.env，args property > 环境变量到优先级 > 系统属性
+            for (String arg : args) {
+                if (arg.length() > 12 && arg.startsWith("--north.env")) {
+                    _appConfig.env = arg.substring(12);
+                    break;
+                }
+            }
+
             if (NorthUtil.isBlank(_appConfig.env)) {
-                _appConfig.env = System.getProperty("north.env", "");
+                _appConfig.env = System.getenv("NORTH_ENV");
+
+                if (NorthUtil.isBlank(_appConfig.env)) {
+                    _appConfig.env = System.getProperty("north.env", "");
+                }
             }
 
             // System.out.println("north.env=" + _appConfig.env);
@@ -63,6 +86,7 @@ public class AppConfig extends Properties {
                         envProperties.forEach((key, value) -> _appConfig.setProperty(String.valueOf(key), String.valueOf(value)));
                     }
                 } catch (IOException e) {
+                    // application-{env}.properties 不存在
                 }
             }
 
@@ -74,6 +98,7 @@ public class AppConfig extends Properties {
                     _appConfig.northVersion = northPkgInfo.getProperty("version");
                 }
             } catch (IOException e) {
+                // pom.properties 不存在
             }
 
             // 加载系统 properties 配置（系统属性优先级高于配置文件）
@@ -81,6 +106,7 @@ public class AppConfig extends Properties {
 
             // 加载系统 env 环境变量（环境变量优先级高于系统属性）
             // 优先级：环境变量 > application.properties > Java系统属性
+            // 系统内变量将会转为 north.xxx.xx
             System.getenv().forEach((key, value) -> {
                 // 把大写的环境变量 NORTH_ABC_DEF 替换成小写的 north.abc.def 覆盖同名的系统属性
                 key = key.toLowerCase();
@@ -90,13 +116,23 @@ public class AppConfig extends Properties {
 
                 _appConfig.setProperty(key, value);
             });
+
+            // 使用 args 参数覆盖，优先级最高
+            for (String arg : args) {
+                if (arg.startsWith("--")) {
+                    String[] argsItemPart = arg.substring(2).split("=");
+                    if (argsItemPart.length == 2) {
+                        _appConfig.setProperty(argsItemPart[0], argsItemPart[1]);
+                    }
+                }
+            }
         }
 
         return _appConfig;
     }
 
     /**
-     * 获取配置 - 字符串
+     * 获取配置 - 字符串键
      *
      * @param key          键值
      * @param defaultValue 默认值

@@ -61,10 +61,14 @@ public class North {
      * 启动 Webapp
      *
      * @param mainAppClass 主入口class
+     * @param args 启动参数
      */
-    public static void start(Class<?> mainAppClass) {
+    public static void start(Class<?> mainAppClass, String[] args) {
         _startTime         = System.currentTimeMillis();
         North.mainAppClass = mainAppClass;
+
+        // 初始化配制信息(单例，只需要初始化一次)
+        AppConfig.of(args);
 
         // 基本目录，fatjar 路径是 xxx/target/xxx.jar
         APP_CLASS_PATH = mainAppClass.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -283,6 +287,7 @@ public class North {
     /**
      * 启动之前触发
      */
+    @SuppressWarnings("unused")
     private static void onBeforeStart(LifecycleEvent event) {
         // 扫描需要预处理的类并处理相关注解
         final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
@@ -307,6 +312,7 @@ public class North {
     /**
      * 启动时触发
      */
+    @SuppressWarnings("unused")
     private static void onStart(LifecycleEvent event) {
         // Leave startup message
         logger.info("[north] startup.time.cost={}ms | startup success at http://{}:{}/",
@@ -318,6 +324,7 @@ public class North {
     /**
      * 启动之后触发
      */
+    @SuppressWarnings("unused")
     private static void onAfterStart(LifecycleEvent event) {
         // 预处理控制器 xxxMapping 注解
         RouteHandler.processMappings();
