@@ -61,7 +61,7 @@ public class North {
      * 启动 Webapp
      *
      * @param mainAppClass 主入口class
-     * @param args 启动参数
+     * @param args         启动参数
      */
     public static void start(Class<?> mainAppClass, String[] args) {
         _startTime         = System.currentTimeMillis();
@@ -364,5 +364,12 @@ public class North {
      */
     public static void interceptor(URLInterceptorAdapter interceptor) {
         ScanClassWithAnnotations.addStoredInterceptors(interceptor);
+    }
+
+    /**
+     * 获取 tomcat context
+     */
+    public static Context getContext() {
+        return context;
     }
 }
