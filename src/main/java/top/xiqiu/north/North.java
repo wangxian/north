@@ -1,6 +1,9 @@
 package top.xiqiu.north;
 
 import org.apache.catalina.*;
+import org.apache.catalina.connector.Connector;
+import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.startup.ContextConfig;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.JarResourceSet;
@@ -29,7 +32,7 @@ public class North {
      * tomcat server + context
      */
     private static Tomcat tomcat;
-    private static Context context;
+    private static StandardContext context;
 
     /**
      * context 配置
@@ -97,6 +100,7 @@ public class North {
     /**
      * 准备 web server 配置
      */
+    @SuppressWarnings("CommentedOutCode")
     private static void _prepareServer() {
         // 默认使用 Tomcat 容器
         tomcat = new Tomcat();
@@ -117,7 +121,8 @@ public class North {
 
         // Set port, default 8080
         tomcat.setPort(port);
-        tomcat.getConnector();
+        // tomcat.getConnector();
+        // tomcat.getHost().setAutoDeploy(false);
 
         // 设置 tomcat 运行参数设置
         // 当所有线程都在使用时，建立连接的请求的等待队列长度，默认100
@@ -130,9 +135,12 @@ public class North {
         // Set doc base
         tomcat.getHost().setAppBase(DOC_BASE);
 
-        // 创建 context
         // context = tomcat.addWebapp(DEFAULT_CONTEXT_PATH, DOC_BASE);
-        context = tomcat.addContext(DEFAULT_CONTEXT_PATH, DOC_BASE);
+        // context = tomcat.addContext(DEFAULT_CONTEXT_PATH, DOC_BASE);
+
+        context = new StandardContext();
+        context.setPath(DEFAULT_CONTEXT_PATH);
+        context.setDocBase(tmpdir);
 
         // 热加载，类编译后，自动reload，刷新浏览器即可查看效果，
         // 在非 fatjar 下默认启用
@@ -140,13 +148,13 @@ public class North {
             context.setReloadable(true);
         }
 
+        // 资源处理
+        WebResourceRoot resources = new StandardRoot(context);
+
         // 是否支持 jsp，不使用 jsp 作为模版引擎的时候，可以不设置支持 jsp
         if ("jsp".equals(North.config().get("north.view-engine", "no"))) {
             // 支持 jsp 后缀
             _supportJsp();
-
-            // 资源处理
-            WebResourceRoot resources = new StandardRoot(context);
 
             // 设置 jsp templates 映射目录
             if (isAppRunInJar) {
@@ -159,73 +167,32 @@ public class North {
 
                 resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates"));
             }
-            context.setResources(resources);
         }
 
-        // 不再需要 220917
-        // // 设置 tomcat 运行环境
-        // // 开发模式及 fatjar 运行、静态文件处理
-        // // 资源处理
-        // WebResourceRoot resources = new StandardRoot(context);
-        // if (isAppRunInJar) {
-        //     // classes
-        //     resources.addJarResources(new JarResourceSet(resources, "/WEB-INF/classes", APP_CLASS_PATH, "/"));
-        //
-        //     // templates
-        //     resources.addJarResources(new JarResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates"));
-        //
-        //     // 处理静态文件 /static
-        //     // resources.addJarResources(new JarResourceSet(resources, "/static", APP_CLASS_PATH, "/static"));
-        // } else {
-        //     // classes
-        //     resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", APP_CLASS_PATH, "/"));
-        //
-        //     // templates
-        //     resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/templates", APP_CLASS_PATH, "/templates"));
-        //
-        //     // 处理静态文件 /static
-        //     // resources.addPreResources(new DirResourceSet(resources, "/static", APP_CLASS_PATH, "/static"));
-        // }
-        // context.setResources(resources);
+        // 支持 tomcat 原生的注解
+        if (isAppRunInJar) {
+            resources.addJarResources(new JarResourceSet(resources, "/WEB-INF/classes", APP_CLASS_PATH, "/"));
+        } else {
+            resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", APP_CLASS_PATH, "/"));
+        }
 
-        // Set scanBootstrapClassPath="true" depending on
-        // exactly how your far JAR is packaged / structured
-        StandardJarScanner standardJarScanner = new StandardJarScanner();
-        standardJarScanner.setScanBootstrapClassPath(true);
-        // 解决/屏蔽 tomcat 启动时 TLDs warning
-        StandardJarScanFilter filter = new StandardJarScanFilter();
-        filter.setTldSkip("*.jar");
-        standardJarScanner.setJarScanFilter(filter);
-        context.setJarScanner(standardJarScanner);
+        // 添加资源
+        context.setResources(resources);
 
-        // Dispatch all web servlet
-        tomcat.addServlet(DEFAULT_CONTEXT_PATH, "north-dispatcher", new DispatcherServlet());
-        context.addServletMappingDecoded("/", "north-dispatcher");
+        // 设置上传临时目录
+        context.setCreateUploadTargets(true);
 
-        // Serve static files & favicon.ico
-        tomcat.addServlet(DEFAULT_CONTEXT_PATH, "static-files", new FileServerServlet());
-        context.addServletMappingDecoded("/static/*", "static-files");
-        context.addServletMappingDecoded("/favicon.ico", "static-files");
+        // Set tld skip, 解决/屏蔽 tomcat 启动时 TLDs warning
+        _setTldSkip();
 
-        // 监听 Server 启动事件
-        // noinspection Convert2Lambda
-        context.addLifecycleListener(new LifecycleListener() {
-            @Override
-            public void lifecycleEvent(LifecycleEvent event) {
-                // logger.info("收到 LifecycleListener 事件 = {}", event.getType());
-                switch (event.getType()) {
-                    case Lifecycle.START_EVENT:
-                        onStart(event);
-                        break;
-                    case Lifecycle.AFTER_START_EVENT:
-                        onAfterStart(event);
-                        break;
-                    case Lifecycle.BEFORE_START_EVENT:
-                        onBeforeStart(event);
-                        break;
-                }
-            }
-        });
+        // add servlet
+        _addServlet();
+
+        // 添加启动监听
+        _addLifecycleListener();
+
+        // 添加 context 到 host
+        tomcat.getHost().addChild(context);
     }
 
     /**
@@ -254,6 +221,46 @@ public class North {
     }
 
     /**
+     * Add servlets
+     */
+    private static void _addServlet() {
+        // Default servlet
+        Wrapper defaultServlet = context.createWrapper();
+        defaultServlet.setName("default");
+        defaultServlet.setServletClass("org.apache.catalina.servlets.DefaultServlet");
+        defaultServlet.addInitParameter("debug", "0");
+        defaultServlet.addInitParameter("listings", "false");
+        defaultServlet.setLoadOnStartup(1);
+        defaultServlet.setOverridable(true);
+        context.addChild(defaultServlet);
+
+        // Dispatch all web servlet
+        Tomcat.addServlet(context, "north-dispatcher", new DispatcherServlet());
+        context.addServletMappingDecoded("/", "north-dispatcher");
+
+        // Serve static files & favicon.ico
+        Tomcat.addServlet(context, "static-files", new FileServerServlet());
+        context.addServletMappingDecoded("/static/*", "static-files");
+        context.addServletMappingDecoded("/favicon.ico", "static-files");
+    }
+
+    /**
+     * Set tld skip
+     */
+    private static void _setTldSkip() {
+        // Set scanBootstrapClassPath="true" depending on
+        // exactly how your far JAR is packaged / structured
+        StandardJarScanner standardJarScanner = new StandardJarScanner();
+        standardJarScanner.setScanBootstrapClassPath(true);
+
+        // 解决/屏蔽 tomcat 启动时 TLDs warning
+        StandardJarScanFilter filter = new StandardJarScanFilter();
+        filter.setTldSkip("*.jar");
+        standardJarScanner.setJarScanFilter(filter);
+        context.setJarScanner(standardJarScanner);
+    }
+
+    /**
      * 支持 jsp
      */
     private static void _supportJsp() {
@@ -272,9 +279,50 @@ public class North {
     }
 
     /**
+     * 添加监听
+     */
+    private static void _addLifecycleListener() {
+        // context.addApplicationListener(WsContextListener.class.getName());
+        // context.addLifecycleListener(new Tomcat.FixContextListener());
+
+        /*
+         * 添加生命周期监听
+         * 用于解析扫描 web.xml、@WebFilter、@WebServlet 等注解
+         */
+        context.addLifecycleListener(new ContextConfig());
+
+        // 监听 Server 启动事件
+        // noinspection Convert2Lambda
+        context.addLifecycleListener(new LifecycleListener() {
+            @Override
+            public void lifecycleEvent(LifecycleEvent event) {
+                // logger.info("收到 LifecycleListener 事件 = {}", event.getType());
+                switch (event.getType()) {
+                    case Lifecycle.START_EVENT:
+                        onStart(event);
+                        break;
+                    case Lifecycle.AFTER_START_EVENT:
+                        onAfterStart(event);
+                        break;
+                    case Lifecycle.BEFORE_START_EVENT:
+                        onBeforeStart(event);
+                        break;
+                }
+            }
+        });
+    }
+
+    /**
      * 启动 web server
      */
     private static void _startServer() {
+        Connector connector = new Connector();
+        connector.setPort(config().getInt("server.port", 8080));
+        connector.setURIEncoding("UTF-8");
+        connector.setThrowOnFailure(true);
+        tomcat.getService().addConnector(connector);
+        tomcat.setConnector(connector);
+
         try {
             tomcat.start();
             tomcat.getServer().await();
@@ -300,13 +348,16 @@ public class North {
         final List<Class<?>> components = ScanClassWithAnnotations.scanComponents(classes);
 
         // 处理 @PostConstruct 注解，并执行
-        PostConstructProcessor.invoke(components);
+        // PostConstructProcessor.invoke(components);
 
         // 处理 @Bean 注解 + 初始化
         ScanClassWithAnnotations.scanAndStoreBeans(classes);
 
         // 处理 @Service 注解 + 初始化
         ScanClassWithAnnotations.scanAndStoreService(classes);
+
+        // ServerContainer serverContainer = (ServerContainer) context.getServletContext().getAttribute(SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE);
+        // System.out.println(serverContainer);
     }
 
     /**
@@ -328,6 +379,17 @@ public class North {
     private static void onAfterStart(LifecycleEvent event) {
         // 预处理控制器 xxxMapping 注解
         RouteHandler.processMappings();
+
+        final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
+
+        // 所有的组件 @Component
+        final List<Class<?>> components = ScanClassWithAnnotations.scanComponents(classes);
+
+        // 处理 @PostConstruct 注解，并执行
+        PostConstructProcessor.invoke(components);
+
+        // ServerContainer serverContainer = (ServerContainer) context.getServletContext().getAttribute(SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE);
+        // System.out.println(serverContainer);
     }
 
     /**
@@ -369,7 +431,7 @@ public class North {
     /**
      * 获取 tomcat context
      */
-    public static Context getContext() {
+    public static StandardContext getContext() {
         return context;
     }
 }
