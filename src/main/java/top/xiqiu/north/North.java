@@ -21,6 +21,9 @@ import top.xiqiu.north.support.URLInterceptorAdapter;
 import java.io.File;
 import java.util.List;
 
+/**
+ * North App main class
+ */
 public class North {
 
     /**
@@ -29,13 +32,13 @@ public class North {
     private static final Logger logger = LoggerFactory.getLogger(North.class);
 
     /**
-     * tomcat server + context
+     * Tomcat server + Context
      */
     private static Tomcat tomcat;
     private static StandardContext context;
 
     /**
-     * context 配置
+     * Context 配置
      */
     private static final String DEFAULT_CONTEXT_PATH = "";
     private static final String DOC_BASE = ".";
@@ -56,9 +59,9 @@ public class North {
     private static long _startTime = 0;
 
     /**
-     * 主入口类
+     * APP 主入口类
      */
-    private static Class<?> mainAppClass;
+    private static Class<?> _mainAppClass;
 
     /**
      * 启动 Webapp
@@ -67,41 +70,50 @@ public class North {
      * @param args         启动参数
      */
     public static void start(Class<?> mainAppClass, String[] args) {
-        _startTime         = System.currentTimeMillis();
-        North.mainAppClass = mainAppClass;
+        if (tomcat != null) {
+            logger.error("STARTUP ERROR, Tomcat server is already running.");
+            return;
+        }
+
+        // North app instance
+        North north = new North();
+
+        // APP 主入口类
+        North._mainAppClass = mainAppClass;
 
         // 初始化配制信息(单例，只需要初始化一次)
         AppConfig.of(args);
 
-        // 基本目录，fatjar 路径是 xxx/target/xxx.jar
-        APP_CLASS_PATH = mainAppClass.getProtectionDomain().getCodeSource().getLocation().getPath();
-        logger.info("[north] app.classpath = {}", APP_CLASS_PATH);
-
-        // 在 fatjar 下运行
-        if (APP_CLASS_PATH.endsWith(".jar")) {
-            isAppRunInJar = true;
-            // System.out.println(mainAppClass.getProtectionDomain().getCodeSource().getLocation().toString());
-        }
-
-        if (isAppRunInJar) {
-            logger.info("[north] north.version = {}", config().getNorthVersion());
-        }
-
         // 做一些 Server 启动前的准备
-        _prepareServer();
+        north._prepareServer();
 
         // 设置 404 / 500 错误页面
-        _errorPage();
+        north._setErrorPage();
 
         // 启动内置web服务器
-        _startServer();
+        north._startServer();
     }
 
     /**
      * 准备 web server 配置
      */
     @SuppressWarnings("CommentedOutCode")
-    private static void _prepareServer() {
+    private void _prepareServer() {
+        _startTime = System.currentTimeMillis();
+
+        // 基本目录，fatjar 路径是 xxx/target/xxx.jar
+        APP_CLASS_PATH = _mainAppClass.getProtectionDomain().getCodeSource().getLocation().getPath();
+        logger.info("[north] app.classpath = {}", APP_CLASS_PATH);
+
+        // 在 fatjar 下运行
+        if (APP_CLASS_PATH.endsWith(".jar")) {
+            isAppRunInJar = true;
+        }
+
+        if (isAppRunInJar) {
+            logger.info("[north] north.version = {}", config().getNorthVersion());
+        }
+
         // 默认使用 Tomcat 容器
         tomcat = new Tomcat();
 
@@ -121,7 +133,6 @@ public class North {
 
         // Set port, default 8080
         tomcat.setPort(port);
-        // tomcat.getConnector();
         // tomcat.getHost().setAutoDeploy(false);
 
         // 设置 tomcat 运行参数设置
@@ -198,7 +209,7 @@ public class North {
     /**
      * Setting ErrorPage, 404, 500
      */
-    private static void _errorPage() {
+    private void _setErrorPage() {
         String errorPage404 = config().get("north.error-page-404", "");
         if (!"".equals(errorPage404)) {
             ErrorPage page404 = new ErrorPage();
@@ -223,7 +234,7 @@ public class North {
     /**
      * Add servlets
      */
-    private static void _addServlet() {
+    private void _addServlet() {
         // Default servlet
         Wrapper defaultServlet = context.createWrapper();
         defaultServlet.setName("default");
@@ -247,7 +258,7 @@ public class North {
     /**
      * Set tld skip
      */
-    private static void _setTldSkip() {
+    private void _setTldSkip() {
         // Set scanBootstrapClassPath="true" depending on
         // exactly how your far JAR is packaged / structured
         StandardJarScanner standardJarScanner = new StandardJarScanner();
@@ -263,7 +274,7 @@ public class North {
     /**
      * 支持 jsp
      */
-    private static void _supportJsp() {
+    private void _supportJsp() {
         // Support *.jsp
         Wrapper jspServlet = context.createWrapper();
 
@@ -281,7 +292,8 @@ public class North {
     /**
      * 添加监听
      */
-    private static void _addLifecycleListener() {
+    @SuppressWarnings("CommentedOutCode")
+    private void _addLifecycleListener() {
         // context.addApplicationListener(WsContextListener.class.getName());
         // context.addLifecycleListener(new Tomcat.FixContextListener());
 
@@ -315,7 +327,7 @@ public class North {
     /**
      * 启动 web server
      */
-    private static void _startServer() {
+    private void _startServer() {
         Connector connector = new Connector();
         connector.setPort(config().getInt("server.port", 8080));
         connector.setURIEncoding("UTF-8");
@@ -336,19 +348,13 @@ public class North {
      * 启动之前触发
      */
     @SuppressWarnings("unused")
-    private static void onBeforeStart(LifecycleEvent event) {
+    private void onBeforeStart(LifecycleEvent event) {
         // 扫描需要预处理的类并处理相关注解
-        final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
+        final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(_mainAppClass.getPackageName());
         // logger.debug("[north] 扫描到的类 = {}", classes);
 
         // 处理 @Controller 注解
         ScanClassWithAnnotations.scanAndStoreControllers(classes);
-
-        // 所有的组件 @Component
-        final List<Class<?>> components = ScanClassWithAnnotations.scanComponents(classes);
-
-        // 处理 @PostConstruct 注解，并执行
-        // PostConstructProcessor.invoke(components);
 
         // 处理 @Bean 注解 + 初始化
         ScanClassWithAnnotations.scanAndStoreBeans(classes);
@@ -356,15 +362,18 @@ public class North {
         // 处理 @Service 注解 + 初始化
         ScanClassWithAnnotations.scanAndStoreService(classes);
 
-        // ServerContainer serverContainer = (ServerContainer) context.getServletContext().getAttribute(SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE);
-        // System.out.println(serverContainer);
+        // 所有的组件 @Component
+        final List<Class<?>> components = ScanClassWithAnnotations.scanComponents(classes);
+
+        // 处理 @PostConstruct 注解，并执行
+        PostConstructProcessor.invoke(components);
     }
 
     /**
      * 启动时触发
      */
     @SuppressWarnings("unused")
-    private static void onStart(LifecycleEvent event) {
+    private void onStart(LifecycleEvent event) {
         // Leave startup message
         logger.info("[north] startup.time.cost={}ms | startup success at http://{}:{}/",
                     System.currentTimeMillis() - _startTime,
@@ -376,20 +385,9 @@ public class North {
      * 启动之后触发
      */
     @SuppressWarnings("unused")
-    private static void onAfterStart(LifecycleEvent event) {
+    private void onAfterStart(LifecycleEvent event) {
         // 预处理控制器 xxxMapping 注解
         RouteHandler.processMappings();
-
-        final List<Class<?>> classes = ScanClassWithAnnotations.findClasses(mainAppClass.getPackageName());
-
-        // 所有的组件 @Component
-        final List<Class<?>> components = ScanClassWithAnnotations.scanComponents(classes);
-
-        // 处理 @PostConstruct 注解，并执行
-        PostConstructProcessor.invoke(components);
-
-        // ServerContainer serverContainer = (ServerContainer) context.getServletContext().getAttribute(SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE);
-        // System.out.println(serverContainer);
     }
 
     /**
