@@ -19,7 +19,7 @@ A Simple / Lightweight / Readable & Quick start framework for Java web
   <dependency>
     <groupId>top.xiqiu</groupId>
     <artifactId>north</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
   </dependency>
 </dependencies>
 ```
