@@ -33,7 +33,7 @@
   <scm>
     <connection>scm:git:git://github.com/wangxian/north.git</connection>
     <developerConnection>scm:git:ssh://github.com:wangxian/north.git</developerConnection>
-    <url>http://github.com/wangxian/north/tree/master</url>
+    <url>https://github.com/wangxian/north/tree/master</url>
   </scm>
 
   <properties>
@@ -41,7 +41,7 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
 
-    <tomcat.version>9.0.65</tomcat.version>
+    <tomcat.version>9.0.69</tomcat.version>
   </properties>
 
   <dependencies>
@@ -54,7 +54,7 @@
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.9.1</version>
+      <version>2.10</version>
     </dependency>
 
     <dependency>
@@ -67,14 +67,14 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.36</version>
+      <version>2.0.5</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>io.pebbletemplates</groupId>
       <artifactId>pebble</artifactId>
-      <version>3.1.5</version>
+      <version>3.1.6</version>
       <scope>provided</scope>
     </dependency>
 
