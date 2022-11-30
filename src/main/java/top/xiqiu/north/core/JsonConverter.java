@@ -2,10 +2,9 @@ package top.xiqiu.north.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 /**
- * json 转换类，方便更换类库
+ * JSON 转换类，方便更换json库
  */
 public class JsonConverter {
     private final Gson gson;
@@ -27,7 +26,10 @@ public class JsonConverter {
     }
 
     /**
-     * 转换为字符串
+     * Java对象 - 转换为字符串
+     *
+     * @param obj Java对象
+     * @return JSON字符串
      */
     public String stringify(Object obj) {
         return gson.toJson(obj);
@@ -35,18 +37,28 @@ public class JsonConverter {
 
     /**
      * 字符串解析为 Java bean
+     *
+     * @param jsonStr JSON字符串
+     * @param jsonType JSON bean 类型
+     *
+     * @return T
      */
     public <T> T parse(String jsonStr, Class<T> jsonType) {
         return gson.fromJson(jsonStr, jsonType);
     }
 
     /**
-     * 字符串解析为 Map/List（泛型解析，注意类型擦除）
+     * 字符串解析为 List/Map（解决泛型擦除的问题）
+     *
+     * <p> 用法：
+     * <p>1. ArrayList<User> users = jsonConverter.parse(jsonStr, new JsonType<ArrayList<User>>(){});
+     * <p>2. HashMap<String, String> map2 = jsonConverter.parse(mapStr, new JsonType<HashMap<String, String>>(){})
+     *
+     * @param jsonStr  JSON字符串
+     * @param jsonType JSON泛型JsonType包装
+     * @return T
      */
-    public <T> T parse(String jsonStr) {
-        // Type type = new TypeToken<T>() {}.getType();
-
-        return gson.fromJson(jsonStr, new TypeToken<T>() {
-        }.getType());
+    public <T> T parse(String jsonStr, JsonType jsonType) {
+        return gson.fromJson(jsonStr, jsonType.getType());
     }
 }

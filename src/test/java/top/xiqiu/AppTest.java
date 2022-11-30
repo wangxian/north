@@ -5,10 +5,14 @@ import org.junit.Test;
 import top.xiqiu.entity.User;
 import top.xiqiu.north.North;
 import top.xiqiu.north.core.AppConfig;
+import top.xiqiu.north.core.JsonConverter;
+import top.xiqiu.north.core.JsonType;
 import top.xiqiu.north.core.ScanClassWithAnnotations;
 import top.xiqiu.north.support.BeanFactory;
 import top.xiqiu.service.UserService;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class AppTest {
@@ -67,5 +71,70 @@ public class AppTest {
         //
         // // CUSTOM_VAR
         // System.out.println("CUSTOM_VAR=" + AppConfig.of().get("CUSTOM_VAR", "not-exist"));
+    }
+
+    @Test
+    public void testJsonConverter() {
+        JsonConverter jsonConverter = new JsonConverter();
+
+        final ArrayList<User> users = new ArrayList<>();
+
+        User user1 = new User();
+        user1.name = "wx1001";
+        users.add(user1);
+
+        User user2 = new User();
+        user2.name = "wx1002";
+        users.add(user2);
+
+        // 对象转 string
+        String jsonStr = jsonConverter.stringify(users);
+        System.out.println("jsonStr = " + jsonStr);
+
+        // Gson gson = new GsonBuilder()
+        //         // 序列化null
+        //         .serializeNulls()
+        //         // 设置日期时间格式，另有2个重载方法
+        //         // 在序列化和反序化时均生效
+        //         .setDateFormat("yyyy-MM-dd HH:mm:ss")
+        //         // 禁此序列化内部类
+        //         .disableInnerClassSerialization()
+        //         // 禁止转义html标签
+        //         .disableHtmlEscaping()
+        //         // 格式化输出
+        //         // .setPrettyPrinting()
+        //         .create();
+
+        // List<User> users2 = gson.fromJson(jsonStr, new TypeToken<List<User>>(){}.getType());
+        // System.out.println(users2);
+
+        // 注意关键是 {}，否则不能原始泛型
+        // List<User> list = new ArrayList<>(){};
+        // System.out.println( ((ParameterizedType) list.getClass().getGenericSuperclass()).getActualTypeArguments()[0] );
+
+        // 解析jsonString，封装后的例子
+        ArrayList<User> users2 = jsonConverter.parse(jsonStr, new JsonType<ArrayList<User>>() {
+        });
+        System.out.println(users2);
+
+        // 下面这两种方法是一样的
+        // User user3 = jsonConverter.parse(jsonConverter.stringify(user1), User.class);
+        User user3 = jsonConverter.parse(jsonConverter.stringify(user1), new JsonType<User>() {
+        });
+        System.out.println(user3);
+
+        // 测试泛型map的解析
+        HashMap<String, String> map = new HashMap<>();
+        map.put("name", "wx1005");
+        map.put("age", "35");
+
+        String mapStr = jsonConverter.stringify(map);
+        System.out.println(mapStr);
+
+        // 下面两种方法都可以
+        // HashMap<String, String> map2 = jsonConverter.parse(mapStr, HashMap.class);
+        HashMap<String, String> map2 = jsonConverter.parse(mapStr, new JsonType<HashMap<String, String>>() {
+        });
+        System.out.println(map2);
     }
 }
