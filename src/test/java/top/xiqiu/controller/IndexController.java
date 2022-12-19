@@ -36,4 +36,12 @@ public class IndexController {
         return String.format("hello world! --- name = %s, id = %d", name, id);
     }
 
+    /**
+     * 测试
+     * http://127.0.0.1:8080/test?id=88&name=hello
+     */
+    @GetMapping("/test")
+    public String test(Integer id, String name) {
+        return String.format("/test --- id = %d, name = %s", id, name);
+    }
 }

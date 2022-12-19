@@ -20,7 +20,7 @@ public class WebURLInterceptor extends URLInterceptorAdapter {
     public boolean preHandle(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         logger.info(":: 拦截器执行了 - 其一 ～");
 
-        if (req.getParameter("id") != null && Integer.parseInt(req.getParameter("id")) > 10) {
+        if (req.getParameter("id") != null && Integer.parseInt(req.getParameter("id")) > 100) {
             resp.setHeader("content-type", "text/plain;charset=utf8");
             resp.getWriter().write("哈哈，你被拦截了～");
             return false;
