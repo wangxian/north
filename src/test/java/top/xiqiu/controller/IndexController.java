@@ -37,7 +37,7 @@ public class IndexController {
     }
 
     /**
-     * 测试
+     * 测试编译参数 -parameters
      * http://127.0.0.1:8080/test?id=88&name=hello
      */
     @GetMapping("/test")

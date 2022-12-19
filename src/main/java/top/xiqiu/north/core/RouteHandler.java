@@ -94,6 +94,8 @@ public class RouteHandler {
                         Parameter p = parameters[i];
 
                         MethodParameter methodParameter = new MethodParameter();
+
+                        // 需要配合编译参数 -parameters，否则得到的是 arg0, arg1
                         methodParameter.setName(p.getName());
                         methodParameter.setClassType(parameterTypes[i]);
 
