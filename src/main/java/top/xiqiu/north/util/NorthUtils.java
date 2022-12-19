@@ -9,11 +9,11 @@ import java.security.MessageDigest;
 /**
  * north 工具类
  */
-public class NorthUtil {
+public class NorthUtils {
     /**
      * logger
      **/
-    private static final Logger LOGGER = LoggerFactory.getLogger(NorthUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NorthUtils.class);
 
     /**
      * 加载一个类

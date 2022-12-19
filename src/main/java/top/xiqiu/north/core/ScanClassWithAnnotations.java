@@ -6,7 +6,7 @@ import top.xiqiu.north.annotation.*;
 import top.xiqiu.north.support.BeanFactory;
 import top.xiqiu.north.support.BeanStoredEntity;
 import top.xiqiu.north.support.URLInterceptorAdapter;
-import top.xiqiu.north.util.NorthUtil;
+import top.xiqiu.north.util.NorthUtils;
 
 import java.io.IOException;
 import java.net.JarURLConnection;
@@ -122,7 +122,7 @@ public class ScanClassWithAnnotations {
 
                 // 类名，去掉 .class 后缀
                 String fullClassName = currentPackageName + "." + fileName.substring(0, fileName.length() - 6);
-                Class<?> clazz = NorthUtil.loadClass(fullClassName);
+                Class<?> clazz = NorthUtils.loadClass(fullClassName);
 
                 // 记录加载成功的类
                 if (clazz != null) {
@@ -167,7 +167,7 @@ public class ScanClassWithAnnotations {
             // LOGGER.info("jar filepath = {}", name);
 
             String className = name.substring(0, name.length() - 6);
-            Class<?> clazz = NorthUtil.loadClass(className.replace("/", "."));
+            Class<?> clazz = NorthUtils.loadClass(className.replace("/", "."));
 
             // 记录加载成功的类
             if (clazz != null) {

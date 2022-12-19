@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.North;
 import top.xiqiu.north.support.*;
-import top.xiqiu.north.util.NorthUtil;
+import top.xiqiu.north.util.NorthUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -157,28 +157,28 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doGet(req, resp);
-        logger.debug("GET {}", req.getRequestURI() + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
+        logger.debug("GET {}", req.getRequestURI() + (NorthUtils.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
         dispatch(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doPost(req, resp);
-        logger.debug("POST {}", req.getRequestURI() + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
+        logger.debug("POST {}", req.getRequestURI() + (NorthUtils.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
         dispatch(req, resp);
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doPut(req, resp);
-        logger.debug("PUT {}", req.getRequestURI() + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
+        logger.debug("PUT {}", req.getRequestURI() + (NorthUtils.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
         dispatch(req, resp);
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // super.doDelete(req, resp);
-        logger.debug("DELETE {}", req.getRequestURI() + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
+        logger.debug("DELETE {}", req.getRequestURI() + (NorthUtils.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
         dispatch(req, resp);
     }
 }

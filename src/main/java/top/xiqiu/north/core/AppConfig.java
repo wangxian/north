@@ -1,6 +1,6 @@
 package top.xiqiu.north.core;
 
-import top.xiqiu.north.util.NorthUtil;
+import top.xiqiu.north.util.NorthUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,10 +60,10 @@ public class AppConfig extends Properties {
                 }
             }
 
-            if (NorthUtil.isBlank(_appConfig.env)) {
+            if (NorthUtils.isBlank(_appConfig.env)) {
                 _appConfig.env = System.getenv("NORTH_ENV");
 
-                if (NorthUtil.isBlank(_appConfig.env)) {
+                if (NorthUtils.isBlank(_appConfig.env)) {
                     _appConfig.env = System.getProperty("north.env", "");
                 }
             }
@@ -78,7 +78,7 @@ public class AppConfig extends Properties {
             //   2. NORTH_ENV=prod java -jar xxx.jar
             // 多套配置文件的情况优先级：application-prod.properties > application.properties
             // 加载 env 对于的配置文件，可能不存在多套配置文件
-            if (NorthUtil.isNotBlank(_appConfig.env)) {
+            if (NorthUtils.isNotBlank(_appConfig.env)) {
                 try (InputStream resourceAsStream = _appConfig.getClass().getClassLoader().getResourceAsStream("application-" + _appConfig.env + ".properties")) {
                     if (resourceAsStream != null) {
                         Properties envProperties = new Properties();
@@ -186,7 +186,7 @@ public class AppConfig extends Properties {
      */
     private <T> T getOrDefault(String key, T defaultValue, Function<String, T> convert) {
         String temp = getProperty(key);
-        if (NorthUtil.isEmpty(temp)) {
+        if (NorthUtils.isEmpty(temp)) {
             return defaultValue;
         } else {
             return convert.apply(temp);

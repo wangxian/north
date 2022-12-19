@@ -3,7 +3,7 @@ package top.xiqiu.north.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.north.North;
-import top.xiqiu.north.util.NorthUtil;
+import top.xiqiu.north.util.NorthUtils;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -43,7 +43,7 @@ public class FileServerServlet extends HttpServlet {
             webFilePath = "/static/favicon.ico";
         }
 
-        logger.debug("GET {}", webFilePath + (NorthUtil.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
+        logger.debug("GET {}", webFilePath + (NorthUtils.isNotBlank(req.getQueryString()) ? "?" + req.getQueryString() : ""));
 
         webFilePath = webFilePath.substring(1);
         final URL resource = this.getClass().getClassLoader().getResource(webFilePath);
