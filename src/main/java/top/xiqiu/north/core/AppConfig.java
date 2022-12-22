@@ -105,15 +105,11 @@ public class AppConfig extends Properties {
             System.getProperties().forEach((key, value) -> _appConfig.setProperty(String.valueOf(key), String.valueOf(value)));
 
             // 加载系统 env 环境变量（环境变量优先级高于系统属性）
-            // 优先级：环境变量 > application.properties > Java系统属性
+            // 优先级：args > 环境变量 > application.properties > Java系统属性
             // 系统内变量将会转为 north.xxx.xx
             System.getenv().forEach((key, value) -> {
                 // 把大写的环境变量 NORTH_ABC_DEF 替换成小写的 north.abc.def 覆盖同名的系统属性
-                key = key.toLowerCase();
-                if (key.startsWith("north")) {
-                    key = key.replaceAll("_", ".");
-                }
-
+                key = key.toLowerCase().replaceAll("_", ".");
                 _appConfig.setProperty(key, value);
             });
 
