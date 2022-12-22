@@ -76,8 +76,8 @@ public class AppConfig extends Properties {
             // **使用方法：**
             //   1. java -Dnorth.env=prod -jar xxx.jar
             //   2. NORTH_ENV=prod java -jar xxx.jar
+            //   3. java -jar xxx.jar --north.env=prod
             // 多套配置文件的情况优先级：application-prod.properties > application.properties
-            // 加载 env 对于的配置文件，可能不存在多套配置文件
             if (NorthUtils.isNotBlank(_appConfig.env)) {
                 try (InputStream resourceAsStream = _appConfig.getClass().getClassLoader().getResourceAsStream("application-" + _appConfig.env + ".properties")) {
                     if (resourceAsStream != null) {
