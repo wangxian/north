@@ -83,8 +83,7 @@ public class DispatcherServlet extends HttpServlet {
 
             String errorPage500 = North.config().get("north.error-page-500", "");
             if (!"".equals(errorPage500)) {
-                req.setAttribute("errorMessage", e.getTargetException().getMessage());
-                req.setAttribute("errorStackTrace", getStackTraceString(e.getTargetException()));
+                req.setAttribute("targetException", e.getTargetException());
                 req.getRequestDispatcher(errorPage500).forward(req, resp);
                 return;
             } else {

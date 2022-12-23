@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.xiqiu.entity.User;
 import top.xiqiu.north.annotation.*;
+import top.xiqiu.north.core.NorthException;
 import top.xiqiu.north.support.SecretCookie;
 import top.xiqiu.service.UserService;
 
@@ -48,6 +49,10 @@ public class IndexController {
      */
     @GetMapping("/test")
     public String test(Integer id, String name) {
+        if (id > 10) {
+            throw new NorthException("抱歉，id不能大于10");
+        }
+
         return String.format("/test --- id = %d, name = %s", id, name);
     }
 
