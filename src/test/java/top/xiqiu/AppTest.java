@@ -9,9 +9,12 @@ import top.xiqiu.north.core.JsonConverter;
 import top.xiqiu.north.core.JsonType;
 import top.xiqiu.north.core.ScanClassWithAnnotations;
 import top.xiqiu.north.support.BeanFactory;
+import top.xiqiu.north.util.AESUtils;
+import top.xiqiu.north.util.DigestUtils;
 import top.xiqiu.service.UserService;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -136,5 +139,29 @@ public class AppTest {
         HashMap<String, String> map2 = jsonConverter.parse(mapStr, new JsonType<HashMap<String, String>>() {
         });
         System.out.println(map2);
+    }
+
+
+    /**
+     * hash 测试
+     */
+    @Test
+    public void testDigest() {
+        System.out.println("DigestUtils.getMD5(\"111111\") = " + DigestUtils.getMD5("111111"));
+        System.out.println("DigestUtils.getSHA1(\"111111\") = " + DigestUtils.getSHA1("111111"));
+        System.out.println("DigestUtils.getSHA256(\"111111\") = " + DigestUtils.getSHA256("111111"));
+        System.out.println("DigestUtils.getHmacSHA1(\"111111\", \"sign-key\") = " + DigestUtils.getHmacSHA1("111111", "sign-key"));
+    }
+
+    @Test
+    public void testAESUtil() {
+        // 加密
+        String key = "ab033b13cb4ac300";
+        String encryptText = AESUtils.encrypt(key, "name=wx-------time=" + new Date().getTime());
+        System.out.println("encryptText = " + encryptText);
+
+        // 解密
+        String plainText = AESUtils.decrypt(key, encryptText);
+        System.out.printf("plainText = " + plainText);
     }
 }
