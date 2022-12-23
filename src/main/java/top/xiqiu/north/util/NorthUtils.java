@@ -5,6 +5,9 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * north 工具类
@@ -115,16 +118,12 @@ public class NorthUtils {
     }
 
     /**
-     * 字符串计算md5
+     * 产生18位的ID
      */
-    public static String md5(String str) {
-        return hash(str, "md5");
-    }
-
-    /**
-     * 字符串计算sha1
-     */
-    public static String sha1(String str) {
-        return hash(str, "sha1");
+    @SuppressWarnings("SpellCheckingInspection")
+    public static String generateLongId() {
+        // 1秒内，可产生 1000 * 90000 = 9000,0000 个ID
+        // 时间10 + 毫秒3 + 随机位5 = 18位
+        return (new SimpleDateFormat("MMddHHmmssSSS").format(new Date())) + "" + ThreadLocalRandom.current().nextInt(10000, 99999);
     }
 }
