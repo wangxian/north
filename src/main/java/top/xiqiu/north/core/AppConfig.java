@@ -76,8 +76,8 @@ public class AppConfig extends Properties {
             // **使用方法：**
             //   1. java -Dnorth.env=prod -jar xxx.jar
             //   2. NORTH_ENV=prod java -jar xxx.jar
+            //   3. java -jar xxx.jar --north.env=prod
             // 多套配置文件的情况优先级：application-prod.properties > application.properties
-            // 加载 env 对于的配置文件，可能不存在多套配置文件
             if (NorthUtils.isNotBlank(_appConfig.env)) {
                 try (InputStream resourceAsStream = _appConfig.getClass().getClassLoader().getResourceAsStream("application-" + _appConfig.env + ".properties")) {
                     if (resourceAsStream != null) {
@@ -105,15 +105,11 @@ public class AppConfig extends Properties {
             System.getProperties().forEach((key, value) -> _appConfig.setProperty(String.valueOf(key), String.valueOf(value)));
 
             // 加载系统 env 环境变量（环境变量优先级高于系统属性）
-            // 优先级：环境变量 > application.properties > Java系统属性
+            // 优先级：args > 环境变量 > application.properties > Java系统属性
             // 系统内变量将会转为 north.xxx.xx
             System.getenv().forEach((key, value) -> {
                 // 把大写的环境变量 NORTH_ABC_DEF 替换成小写的 north.abc.def 覆盖同名的系统属性
-                key = key.toLowerCase();
-                if (key.startsWith("north")) {
-                    key = key.replaceAll("_", ".");
-                }
-
+                key = key.toLowerCase().replaceAll("_", ".");
                 _appConfig.setProperty(key, value);
             });
 
