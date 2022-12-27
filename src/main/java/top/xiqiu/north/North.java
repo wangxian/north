@@ -101,6 +101,8 @@ public class North {
     private void _prepareServer() {
         _startTime = System.currentTimeMillis();
 
+        logger.info("[north] north.env = {}", config().get("north.env", "\"\""));
+
         // 基本目录，fatjar 路径是 xxx/target/xxx.jar
         APP_CLASS_PATH = _mainAppClass.getProtectionDomain().getCodeSource().getLocation().getPath();
         logger.info("[north] app.classpath = {}", APP_CLASS_PATH);
