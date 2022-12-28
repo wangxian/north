@@ -1,5 +1,6 @@
 package top.xiqiu;
 
+import com.google.gson.Gson;
 import org.junit.Assert;
 import org.junit.Test;
 import top.xiqiu.entity.User;
@@ -13,10 +14,8 @@ import top.xiqiu.north.util.AESUtils;
 import top.xiqiu.north.util.DigestUtils;
 import top.xiqiu.service.UserService;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 
 public class AppTest {
     // Run application
@@ -163,5 +162,37 @@ public class AppTest {
         // 解密
         String plainText = AESUtils.decrypt(key, encryptText);
         System.out.printf("plainText = " + plainText);
+    }
+
+    @Test
+    public void testGsonInt2Double() {
+        Gson gson = new Gson();
+        String json = "{\"key1\":11,\"key2\":2.0,\"key3\":\"3\"}";
+
+        Map m = gson.fromJson(json, Map.class);
+
+        // output 11.0
+        System.out.println(m.get("key1"));
+        // output 2.0
+        System.out.println(m.get("key2"));
+        // output 3 <string>
+        System.out.println(m.get("key3"));
+
+        final JsonConverter jsonConverter = new JsonConverter();
+        Map jsonData = jsonConverter.parse(json, Map.class);
+        // output {key1=11, key2=2.0, key3=3}
+        System.out.println(jsonData);
+
+        Map jsonData2 = new HashMap();
+        jsonData2.put("key1", 11);
+        jsonData2.put("key2", 2.0);
+        jsonData2.put("key3", "3");
+        jsonData2.put("key4", Integer.valueOf("2"));
+        jsonData2.put("key5", Float.valueOf("1.01234567890123456789"));
+        jsonData2.put("key5-2", Double.valueOf("1.01234567890123456789"));
+        jsonData2.put("key6", new BigDecimal("3.01234567890123456789"));
+        // output {"key1":11,"key2":2.0,"key3":"3","key4":2,"key5":1.0123457,"key5-2":1.0123456789012346,"key6":3.01234567890123456789}
+        System.out.println(jsonConverter.stringify(jsonData2));
+
     }
 }

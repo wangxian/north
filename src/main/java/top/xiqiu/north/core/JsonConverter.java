@@ -2,6 +2,7 @@ package top.xiqiu.north.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.ToNumberPolicy;
 
 /**
  * JSON 转换类，方便更换json库
@@ -20,6 +21,10 @@ public class JsonConverter {
                 .disableInnerClassSerialization()
                 // 禁止转义html标签
                 .disableHtmlEscaping()
+                // Configures Gson to apply a specific number strategy during deserialization of Object.
+                .setObjectToNumberStrategy(ToNumberPolicy.LAZILY_PARSED_NUMBER)
+                // Configures Gson to apply a specific number strategy during deserialization of Number.
+                .setNumberToNumberStrategy(ToNumberPolicy.LAZILY_PARSED_NUMBER)
                 // 格式化输出
                 // .setPrettyPrinting()
                 .create();
