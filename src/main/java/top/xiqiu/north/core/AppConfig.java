@@ -25,7 +25,10 @@ public class AppConfig extends Properties {
 
     /**
      * 初始化配置（单例）
+     *
+     * <pre>{@code
      * 配置的优先级：args property > 环境变量 > 系统属性 > application-prod.properties > application.properties
+     * }</pre>
      */
     public static AppConfig of() {
         if (_appConfig != null) {

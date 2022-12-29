@@ -55,9 +55,11 @@ public class JsonConverter {
     /**
      * 字符串解析为 List/Map（解决泛型擦除的问题）
      *
-     * <p> 用法：
-     * <p>1. ArrayList<User> users = jsonConverter.parse(jsonStr, new JsonType<ArrayList<User>>(){});
-     * <p>2. HashMap<String, String> map2 = jsonConverter.parse(mapStr, new JsonType<HashMap<String, String>>(){})
+     * <pre>{@code
+     * 用法：
+     *  1. ArrayList<User> users = jsonConverter.parse(jsonStr, new JsonType<ArrayList<User>>(){});
+     *  2. HashMap<String, String> map2 = jsonConverter.parse(mapStr, new JsonType<HashMap<String, String>>(){})
+     * }</pre>
      *
      * @param jsonStr  JSON字符串
      * @param jsonType JSON泛型JsonType包装
