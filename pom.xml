@@ -18,6 +18,10 @@
       <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
+  <organization>
+    <name>wboll</name>
+    <url>https://github.com/wboll</url>
+  </organization>
   <developers>
     <developer>
       <id>WangXian</id>
