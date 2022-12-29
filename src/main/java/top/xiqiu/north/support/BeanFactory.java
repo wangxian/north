@@ -4,6 +4,7 @@ import top.xiqiu.north.core.ScanClassWithAnnotations;
 
 import java.util.List;
 
+@SuppressWarnings("unchecked")
 public class BeanFactory {
     /**
      * 获得 bean - byName

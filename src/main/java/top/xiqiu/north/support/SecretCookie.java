@@ -14,6 +14,7 @@ import java.util.Map;
 /**
  * 安全的 Cookie
  */
+@SuppressWarnings("unchecked")
 public class SecretCookie extends Cookie {
     /**
      * 加密密钥，建议修改
