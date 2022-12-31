@@ -17,6 +17,7 @@ import top.xiqiu.service.UserService;
 import java.math.BigDecimal;
 import java.util.*;
 
+@SuppressWarnings("unchecked")
 public class AppTest {
     // Run application
     public static void main(String[] args) {
