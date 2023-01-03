@@ -74,7 +74,7 @@ public class ScanClassWithAnnotations {
             URL url = dirs.nextElement();
             String protocol = url.getProtocol();
 
-            // LOGGER.info("package = {}", url.getFile());
+            // logger.info("package = {}", url.getFile());
 
             // protocol 可以是 http/https/file/jar
             // 扫描只需处理 file/jar 即可
@@ -94,7 +94,7 @@ public class ScanClassWithAnnotations {
                 _getClassesByJar(basePackageName, jarFile, classes);
             }
 
-            // LOGGER.info("下级所有的类={}", classes);
+            // logger.info("下级所有的类={}", classes);
         }
 
         return classes;
@@ -112,7 +112,7 @@ public class ScanClassWithAnnotations {
             for (Path path : paths) {
                 // 文件名，eg: xxx.class
                 String fileName = path.toFile().getName();
-                // LOGGER.info("filepath = {}", path.toFile().getPath() + "/" + path.toFile().getName());
+                // logger.info("filepath = {}", path.toFile().getPath() + "/" + path.toFile().getName());
 
                 // 如果 path 是一个目录，则递归调用获取下级文件及目录
                 if (Files.isDirectory(path)) {
@@ -164,7 +164,7 @@ public class ScanClassWithAnnotations {
                 continue;
             }
 
-            // LOGGER.info("jar filepath = {}", name);
+            // logger.info("jar filepath = {}", name);
 
             String className = name.substring(0, name.length() - 6);
             Class<?> clazz = NorthUtils.loadClass(className.replace("/", "."));
@@ -188,7 +188,7 @@ public class ScanClassWithAnnotations {
             }
         }
 
-        // LOGGER.info("扫描到的控制器 = {}", storedControllers);
+        // logger.info("扫描到的控制器 = {}", storedControllers);
     }
 
     /**
