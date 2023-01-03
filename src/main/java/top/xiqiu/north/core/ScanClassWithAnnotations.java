@@ -120,6 +120,11 @@ public class ScanClassWithAnnotations {
                     continue;
                 }
 
+                // 只关注 .class 结尾的文件
+                if (!fileName.endsWith(".class")) {
+                    continue;
+                }
+
                 // 类名，去掉 .class 后缀
                 String fullClassName = currentPackageName + "." + fileName.substring(0, fileName.length() - 6);
                 Class<?> clazz = NorthUtils.loadClass(fullClassName);
