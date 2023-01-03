@@ -123,7 +123,7 @@ public class NorthUtils {
     @SuppressWarnings("SpellCheckingInspection")
     public static String generateLongId() {
         // 1秒内，可产生 1000 * 90000 = 9000,0000 个ID
-        // 时间10 + 毫秒3 + 随机位5 = 18位
-        return (new SimpleDateFormat("MMddHHmmssSSS").format(new Date())) + "" + ThreadLocalRandom.current().nextInt(10000, 99999);
+        // 时间12 + 毫秒3 + 随机位5 = 18位
+        return (new SimpleDateFormat("yyMMddHHmmssSSS").format(new Date())) + "" + ThreadLocalRandom.current().nextInt(10000, 99999);
     }
 }
