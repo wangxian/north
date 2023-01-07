@@ -1,5 +1,6 @@
 package top.xiqiu.north.core;
 
+import top.xiqiu.north.North;
 import top.xiqiu.north.util.NorthUtils;
 
 import java.io.IOException;
@@ -94,14 +95,16 @@ public class AppConfig extends Properties {
             }
 
             // 获取north当前版本号 - 注意：只有在fatjar下生效
-            try (InputStream resourceAsStream = _appConfig.getClass().getClassLoader().getResourceAsStream("META-INF/maven/top.xiqiu/north/pom.properties")) {
-                if (resourceAsStream != null) {
-                    Properties northPkgInfo = new Properties();
-                    northPkgInfo.load(resourceAsStream);
-                    _appConfig.northVersion = northPkgInfo.getProperty("version");
+            if (North.isAppRunInJar) {
+                try (InputStream resourceAsStream = _appConfig.getClass().getClassLoader().getResourceAsStream("META-INF/maven/top.xiqiu/north/pom.properties")) {
+                    if (resourceAsStream != null) {
+                        Properties northPkgInfo = new Properties();
+                        northPkgInfo.load(resourceAsStream);
+                        _appConfig.northVersion = northPkgInfo.getProperty("version");
+                    }
+                } catch (IOException e) {
+                    // pom.properties 不存在
                 }
-            } catch (IOException e) {
-                // pom.properties 不存在
             }
 
             // 加载系统 properties 配置（系统属性优先级高于配置文件）
