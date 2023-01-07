@@ -45,13 +45,14 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
 
-    <tomcat.version>9.0.69</tomcat.version>
+    <tomcat.version>9.0.70</tomcat.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
       <artifactId>tomcat-embed-core</artifactId>
+      <!--suppress MavenPackageUpdate -->
       <version>${tomcat.version}</version>
     </dependency>
 
@@ -64,6 +65,7 @@
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
       <artifactId>tomcat-embed-jasper</artifactId>
+      <!--suppress MavenPackageUpdate -->
       <version>${tomcat.version}</version>
       <scope>provided</scope>
     </dependency>
@@ -78,6 +80,7 @@
     <dependency>
       <groupId>io.pebbletemplates</groupId>
       <artifactId>pebble</artifactId>
+      <!--suppress MavenPackageUpdate -->
       <version>3.1.6</version>
       <scope>provided</scope>
     </dependency>
