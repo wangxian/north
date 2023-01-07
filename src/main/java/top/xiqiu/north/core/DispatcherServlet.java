@@ -120,7 +120,25 @@ public class DispatcherServlet extends HttpServlet {
             }
 
             // 渲染视图
-            this.viewEngine.render(modelAndView, req, resp);
+            try {
+                this.viewEngine.render(modelAndView, req, resp);
+            } catch (Exception e) {
+                logger.error("viewEngine render cause exception = ", e);
+
+                // 处理模板发生错误时，显示错误页面
+                String errorPage500 = North.config().get("north.error-page-500", "");
+                if (!"".equals(errorPage500)) {
+                    req.setAttribute("targetException", e);
+                    req.getRequestDispatcher(errorPage500).forward(req, resp);
+                    return;
+                }
+
+                resp.setContentType("text/plain");
+                resp.setCharacterEncoding("UTF-8");
+
+                resp.getWriter().write(getStackTraceString(e));
+                return;
+            }
         } else if (invokeResult instanceof String) {
             // 响应为文本字符串
             resp.setContentType("text/plain");
