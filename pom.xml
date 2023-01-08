@@ -34,7 +34,7 @@
       <organization>wboll</organization>
     </developer>
   </developers>
-  ƒ
+
   <scm>
     <connection>scm:git:git://github.com/wboll/north.git</connection>
     <developerConnection>scm:git:ssh://github.com:wboll/north.git</developerConnection>
