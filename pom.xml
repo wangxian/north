@@ -6,11 +6,11 @@
 
   <groupId>top.xiqiu</groupId>
   <artifactId>north</artifactId>
-  <version>1.1.2</version>
+  <version>1.1.3</version>
   <packaging>jar</packaging>
 
   <name>north</name>
-  <url>https://github.com/wangxian/north</url>
+  <url>https://github.com/wboll/north</url>
   <description>A Simple / Lightweight / Readable Java web framework.</description>
   <licenses>
     <license>
@@ -34,10 +34,11 @@
       <organization>wboll</organization>
     </developer>
   </developers>
+  ƒ
   <scm>
-    <connection>scm:git:git://github.com/wangxian/north.git</connection>
-    <developerConnection>scm:git:ssh://github.com:wangxian/north.git</developerConnection>
-    <url>https://github.com/wangxian/north/tree/master</url>
+    <connection>scm:git:git://github.com/wboll/north.git</connection>
+    <developerConnection>scm:git:ssh://github.com:wboll/north.git</developerConnection>
+    <url>https://github.com/wboll/north/tree/master</url>
   </scm>
 
   <properties>
